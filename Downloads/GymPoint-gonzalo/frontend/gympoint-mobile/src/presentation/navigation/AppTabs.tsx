@@ -23,6 +23,7 @@ import {
   RoutineHistoryScreen,
   RoutinesScreen,
   CreateRoutineScreen,
+  ImportRoutineScreen,
 } from '@features/routines';
 
 import { TabIcon } from './components/TabIcon';
@@ -44,6 +45,11 @@ function RoutinesStackNavigator() {
       <RoutinesStack.Screen
         name="CreateRoutine"
         component={CreateRoutineScreen}
+        options={{ headerShown: false }}
+      />
+      <RoutinesStack.Screen
+        name="ImportRoutine"
+        component={ImportRoutineScreen}
         options={{ headerShown: false }}
       />
       <RoutinesStack.Screen

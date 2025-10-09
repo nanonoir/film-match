@@ -17,6 +17,7 @@ import FloatingActions from '@features/routines/presentation/ui/components/Float
 type RoutinesStackParamList = {
   RoutinesList: undefined;
   CreateRoutine: undefined;
+  ImportRoutine: undefined;
   RoutineDetail: { id: string };
   RoutineHistory: { id: string };
   RoutineExecution: { id: string };
@@ -69,7 +70,7 @@ export default function RoutinesScreen() {
       />
       <FloatingActions
         onCreate={() => navigation.navigate('CreateRoutine')}
-        onImport={() => {}}
+        onImport={() => navigation.navigate('ImportRoutine')}
       />
     </>
   );

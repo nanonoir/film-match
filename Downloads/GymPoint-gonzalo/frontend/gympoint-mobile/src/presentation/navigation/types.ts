@@ -16,6 +16,7 @@ export type TabParamList = {
 export type RoutinesStackParamList = {
   RoutinesList: undefined;
   CreateRoutine: undefined;
+  ImportRoutine: undefined;
   RoutineDetail: { id: string };
   RoutineHistory: { id: string };
   RoutineExecution: { id: string };
