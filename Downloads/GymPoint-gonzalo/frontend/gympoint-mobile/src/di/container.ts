@@ -3,6 +3,7 @@ import { AuthRepository } from '@features/auth/domain/repositories/AuthRepositor
 import { AuthRepositoryImpl } from '@features/auth/data/AuthRepositoryImpl';
 import { LoginUser } from '@features/auth/domain/usecases/LoginUser';
 import { GetMe } from '@features/auth/domain/usecases/GetMe';
+import { RegisterUser } from '@features/auth/domain/usecases/RegisterUser';
 
 // ===== Gyms (ya existente) =====
 import { GymRepository } from '@features/gyms/domain/repositories/GymRepository';
@@ -45,11 +46,18 @@ import { GetUserProfile } from '@features/user/domain/usecases/GetUserProfile';
 import { UpdateUserSettings } from '@features/user/domain/usecases/UpdateUserSettings';
 import { UpgradeToPremium } from '@features/user/domain/usecases/UpgradeToPremium';
 
+// ===== Progress =====
+import { ProgressRepository } from '@features/progress/domain/repositories/ProgressRepository';
+import { ProgressRepositoryImpl } from '@features/progress/data/ProgressRepositoryImpl';
+import { ProgressLocal } from '@features/progress/data/datasources/ProgressLocal';
+import { GetProgress } from '@features/progress/domain/usecases/GetProgress';
+
 class Container {
   // Auth
   authRepository: AuthRepository;
   loginUser: LoginUser;
   getMe: GetMe;
+  registerUser: RegisterUser;
 
   // Gyms
   gymRepository: GymRepository;
@@ -86,11 +94,17 @@ class Container {
   updateUserSettings: UpdateUserSettings;
   upgradeToPremium: UpgradeToPremium;
 
+  // Progress
+  progressLocal: ProgressLocal;
+  progressRepository: ProgressRepository;
+  getProgress: GetProgress;
+
   constructor() {
     // Auth
     this.authRepository = new AuthRepositoryImpl();
     this.loginUser = new LoginUser(this.authRepository);
     this.getMe = new GetMe(this.authRepository);
+    this.registerUser = new RegisterUser(this.authRepository);
 
     // Gyms
     this.gymRepository = new GymRepositoryImpl();
@@ -126,6 +140,11 @@ class Container {
     this.getUserProfile = new GetUserProfile(this.userRepository);
     this.updateUserSettings = new UpdateUserSettings(this.userRepository);
     this.upgradeToPremium = new UpgradeToPremium(this.userRepository);
+
+    // Progress
+    this.progressLocal = new ProgressLocal();
+    this.progressRepository = new ProgressRepositoryImpl(this.progressLocal);
+    this.getProgress = new GetProgress(this.progressRepository);
   }
 }
 
