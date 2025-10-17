@@ -1,9 +1,47 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { User } from '@features/auth/domain/entities/User';
-import { HeaderWrapper, HeaderTitle } from '../styles/layout';
+
+// Header styled components
+const HeaderContainer = styled(View)`
+  padding: 16px;
+  padding-bottom: 20px;
+  border-bottom-width: 1px;
+  border-bottom-color: #f3f4f6;
+`;
+
+const BackButtonRow = styled(View)`
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 12px;
+`;
+
+const BackButton = styled(TouchableOpacity)`
+  flex-direction: row;
+  align-items: center;
+  padding: 4px 0;
+`;
+
+const BackIcon = styled(Text)`
+  font-size: 20px;
+  color: #3b82f6;
+  margin-right: 6px;
+`;
+
+const BackText = styled(Text)`
+  font-size: 16px;
+  color: #3b82f6;
+  font-weight: 600;
+`;
+
+const Title = styled(Text)`
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+`;
 
 // Banner styled components
 const BannerCard = styled(View)`
@@ -73,16 +111,28 @@ type RewardsHeaderProps = {
 };
 
 export const RewardsHeader: React.FC<RewardsHeaderProps> = ({ user }) => {
+  const navigation = useNavigation<any>();
+
   // Calcular progreso hacia la próxima recompensa (ejemplo: necesita 25 tokens)
   const tokensNeeded = 25;
   const currentTokens = user.tokens;
   const progressPercentage = Math.min((currentTokens / tokensNeeded) * 100, 100);
 
+  const handleBack = () => {
+    navigation.navigate('Inicio');
+  };
+
   return (
     <>
-      <HeaderWrapper>
-        <HeaderTitle>Recompensas</HeaderTitle>
-      </HeaderWrapper>
+      <HeaderContainer>
+        <BackButtonRow>
+          <BackButton onPress={handleBack}>
+            <BackIcon>←</BackIcon>
+            <BackText>Volver al inicio</BackText>
+          </BackButton>
+        </BackButtonRow>
+        <Title>Recompensas</Title>
+      </HeaderContainer>
 
       <BannerCard>
         <BannerHeader>
