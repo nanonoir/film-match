@@ -12,3 +12,9 @@ export type { IMovieRepository, IUserDataRepository } from './repositories';
 
 // Use Cases
 export { FilterMoviesUseCase, AddMovieMatchUseCase, RateMovieUseCase } from './useCases';
+
+// Errors
+export * from './errors';
+
+// Services
+export { ErrorClassifier } from './services';

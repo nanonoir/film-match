@@ -241,6 +241,7 @@ const MovieListContainer: React.FC = () => {
                 {/* Main card */}
                 {currentMovie && (
                   <MovieCardComponent
+                    key={currentMovie.id}
                     movie={currentMovie}
                     onMatch={handleMatch}
                     onSkip={handleSkip}

@@ -1,6 +1,6 @@
 /**
  * Core Layer Exports
- * Clean Architecture: Domain, Data, and DI layers
+ * Clean Architecture: Domain, Data, Infrastructure, and DI layers
  */
 
 // Domain Layer
@@ -11,8 +11,12 @@ export {
   FilterMoviesUseCase,
   AddMovieMatchUseCase,
   RateMovieUseCase,
+  ErrorClassifier,
 } from './domain';
 export type { IMovieRepository, IUserDataRepository, MovieFilterCriteria } from './domain';
+
+// Domain - Errors
+export * from './domain/errors';
 
 // Data Layer
 export {
@@ -24,6 +28,10 @@ export {
   UserDataLocalDataSource,
 } from './data';
 export type { MovieDTO, UserRatingDTO, UserDataDTO } from './data';
+
+// Infrastructure Layer
+export { errorLogger, ConsoleErrorLogger } from './infrastructure';
+export type { IErrorLogger, LogEntry } from './infrastructure';
 
 // Dependency Injection Layer
 export {

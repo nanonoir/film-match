@@ -6,7 +6,7 @@
  * Handles match and skip actions through callbacks
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { Heart, X, Star } from 'lucide-react';
 import type { Movie } from '@core';
@@ -50,6 +50,14 @@ const MovieCard: React.FC<MovieCardProps> = ({
 
   // Exit animation state
   const [exitX, setExitX] = useState(0);
+
+  /**
+   * Reset exit animation when movie changes
+   * This ensures each new movie starts with a fresh state
+   */
+  useEffect(() => {
+    setExitX(0);
+  }, [movie.id]);
 
   /**
    * Handle drag end event
