@@ -17,7 +17,11 @@ export interface UserProfile {
   id: string;
   email: string;
   name?: string;
-  avatar?: string;
+  nickname?: string; // Apodo del usuario
+  avatar?: string; // Path al avatar seleccionado
+  bio?: string; // Descripción/biografía
+  twitterUrl?: string; // URL de Twitter
+  instagramUrl?: string; // URL de Instagram
   createdAt: Date;
 }
 

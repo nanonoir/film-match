@@ -7,6 +7,7 @@
 
 import React, { useReducer, useCallback, useEffect, ReactNode } from 'react';
 import { UserContext, initialUserState, type UserState, type UserProfile } from './UserContext';
+import { DEFAULT_AVATAR } from '../../shared/constants/avatars';
 
 const STORAGE_KEY = 'film-match:user';
 
@@ -75,7 +76,8 @@ function userReducer(state: UserState, action: UserAction): UserState {
 }
 
 /**
- * Load user from localStorage
+ * Load user from localStorage or create mock user
+ * Since this is a static frontend, always provide a mock user
  */
 function loadUserFromStorage(): UserState {
   try {
@@ -95,7 +97,26 @@ function loadUserFromStorage(): UserState {
   } catch (err) {
     console.error('Error loading user from storage:', err);
   }
-  return { ...initialUserState, loading: false };
+
+  // Return mock user by default for static frontend
+  const mockUser: UserProfile = {
+    id: 'mock-user-1',
+    email: 'cinefiloextremo@moviematch.com',
+    name: 'CineFiloExtremo',
+    nickname: 'CineFiloExtremo',
+    avatar: DEFAULT_AVATAR.id,
+    bio: 'Amante del cine clásico y moderno. Siempre buscando la próxima gran película.',
+    twitterUrl: 'https://twitter.com/cinefiloextremo',
+    instagramUrl: 'https://instagram.com/cinefiloextremo',
+    createdAt: new Date(),
+  };
+
+  return {
+    isAuthenticated: true,
+    user: mockUser,
+    loading: false,
+    error: null,
+  };
 }
 
 /**
@@ -136,6 +157,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         id: crypto.randomUUID(),
         email,
         name: email.split('@')[0],
+        nickname: 'CineFiloExtremo',
+        avatar: DEFAULT_AVATAR.id,
+        bio: 'Amante del cine clásico y moderno. Siempre buscando la próxima gran película.',
+        twitterUrl: 'https://twitter.com/cinefiloextremo',
+        instagramUrl: 'https://instagram.com/cinefiloextremo',
         createdAt: new Date(),
       };
 
@@ -158,7 +184,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         id: crypto.randomUUID(),
         email: 'user@gmail.com',
         name: 'Google User',
-        avatar: 'https://via.placeholder.com/150',
+        nickname: 'CineFiloExtremo',
+        avatar: DEFAULT_AVATAR.id,
+        bio: 'Amante del cine clásico y moderno. Siempre buscando la próxima gran película.',
+        twitterUrl: 'https://twitter.com/cinefiloextremo',
+        instagramUrl: 'https://instagram.com/cinefiloextremo',
         createdAt: new Date(),
       };
 
@@ -193,6 +223,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         id: crypto.randomUUID(),
         email,
         name: email.split('@')[0],
+        nickname: 'CineFiloExtremo',
+        avatar: DEFAULT_AVATAR.id,
+        bio: 'Amante del cine clásico y moderno. Siempre buscando la próxima gran película.',
+        twitterUrl: 'https://twitter.com/cinefiloextremo',
+        instagramUrl: 'https://instagram.com/cinefiloextremo',
         createdAt: new Date(),
       };
 

@@ -32,6 +32,12 @@ export interface UIState {
   // Chatbot
   chatbotOpen: boolean;
 
+  // Tutorial
+  tutorialOpen: boolean;
+
+  // Profile Edit Modal
+  profileEditModalOpen: boolean;
+
   // Notifications/Toasts
   notifications: Notification[];
 }
@@ -68,6 +74,14 @@ export interface UIActions {
   closeChatbot: () => void;
   toggleChatbot: () => void;
 
+  // Tutorial
+  openTutorial: () => void;
+  closeTutorial: () => void;
+
+  // Profile Edit Modal
+  openProfileEditModal: () => void;
+  closeProfileEditModal: () => void;
+
   // Notifications
   showNotification: (notification: Omit<Notification, 'id'>) => void;
   dismissNotification: (id: string) => void;
@@ -95,6 +109,8 @@ export const initialUIState: UIState = {
     isOpen: false,
   },
   chatbotOpen: false,
+  tutorialOpen: false,
+  profileEditModalOpen: false,
   notifications: [],
 };
 

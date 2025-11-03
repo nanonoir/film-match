@@ -27,6 +27,12 @@ type UIAction =
   | { type: 'OPEN_CHATBOT' }
   | { type: 'CLOSE_CHATBOT' }
   | { type: 'TOGGLE_CHATBOT' }
+  // Tutorial
+  | { type: 'OPEN_TUTORIAL' }
+  | { type: 'CLOSE_TUTORIAL' }
+  // Profile Edit Modal
+  | { type: 'OPEN_PROFILE_EDIT_MODAL' }
+  | { type: 'CLOSE_PROFILE_EDIT_MODAL' }
   // Notifications
   | { type: 'SHOW_NOTIFICATION'; payload: Notification }
   | { type: 'DISMISS_NOTIFICATION'; payload: string }
@@ -113,6 +119,32 @@ function uiReducer(state: UIState, action: UIAction): UIState {
         chatbotOpen: !state.chatbotOpen,
       };
 
+    // Tutorial
+    case 'OPEN_TUTORIAL':
+      return {
+        ...state,
+        tutorialOpen: true,
+      };
+
+    case 'CLOSE_TUTORIAL':
+      return {
+        ...state,
+        tutorialOpen: false,
+      };
+
+    // Profile Edit Modal
+    case 'OPEN_PROFILE_EDIT_MODAL':
+      return {
+        ...state,
+        profileEditModalOpen: true,
+      };
+
+    case 'CLOSE_PROFILE_EDIT_MODAL':
+      return {
+        ...state,
+        profileEditModalOpen: false,
+      };
+
     // Notifications
     case 'SHOW_NOTIFICATION':
       return {
@@ -194,6 +226,24 @@ export const UIProvider: React.FC<UIProviderProps> = ({ children }) => {
     dispatch({ type: 'TOGGLE_CHATBOT' });
   }, []);
 
+  // Tutorial Actions
+  const openTutorial = useCallback(() => {
+    dispatch({ type: 'OPEN_TUTORIAL' });
+  }, []);
+
+  const closeTutorial = useCallback(() => {
+    dispatch({ type: 'CLOSE_TUTORIAL' });
+  }, []);
+
+  // Profile Edit Modal Actions
+  const openProfileEditModal = useCallback(() => {
+    dispatch({ type: 'OPEN_PROFILE_EDIT_MODAL' });
+  }, []);
+
+  const closeProfileEditModal = useCallback(() => {
+    dispatch({ type: 'CLOSE_PROFILE_EDIT_MODAL' });
+  }, []);
+
   // Notification Actions
   const showNotification = useCallback((notification: Omit<Notification, 'id'>) => {
     const notificationWithId: Notification = {
@@ -232,6 +282,10 @@ export const UIProvider: React.FC<UIProviderProps> = ({ children }) => {
     openChatbot,
     closeChatbot,
     toggleChatbot,
+    openTutorial,
+    closeTutorial,
+    openProfileEditModal,
+    closeProfileEditModal,
     showNotification,
     dismissNotification,
     clearNotifications,

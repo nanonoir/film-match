@@ -3,6 +3,7 @@ import { AppProvider } from './context';
 import { ErrorBoundary } from './presentation/components/ErrorBoundary';
 import Login from './pages/Login';
 import Home from './pages/Home';
+import Profile from './pages/Profile';
 import MovieDetailsPage from './pages/MovieDetailsPage';
 
 /**
@@ -22,6 +23,7 @@ function App() {
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/home" element={<Home />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/movie/:id" element={<MovieDetailsPage />} />
           </Routes>
         </Router>
