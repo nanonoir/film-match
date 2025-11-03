@@ -1,20 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Star } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import RatingModal from '../components/RatingModal';
-import { useApp } from '../context/AppContext';
+import RatingModal from '../presentation/hooks/RatingModal';
+import { useMovieRepository } from '@/hooks';
+import type { Movie } from '@core';
 
 const MovieDetailsPage: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { movies, addRating } = useApp();
+  const { getById, loading, error } = useMovieRepository();
+  const [movie, setMovie] = useState<Movie | null>(null);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const [notFound, setNotFound] = useState(false);
 
-  const movie = movies.find((m) => m.id === parseInt(id || '0'));
+  // Load movie on mount
+  useEffect(() => {
+    const loadMovie = async () => {
+      try {
+        const movieId = parseInt(id || '0');
+        if (movieId === 0) {
+          setNotFound(true);
+          return;
+        }
 
-  if (!movie) {
+        const loadedMovie = await getById(movieId);
+        if (loadedMovie) {
+          setMovie(loadedMovie);
+        } else {
+          setNotFound(true);
+        }
+      } catch (err) {
+        console.error('Error loading movie:', err);
+        setNotFound(true);
+      }
+    };
+
+    loadMovie();
+  }, [id, getById]);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading movie...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || notFound || !movie) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -26,10 +65,6 @@ const MovieDetailsPage: React.FC = () => {
       </div>
     );
   }
-
-  const handleRatingSubmit = (rating: number, comment: string) => {
-    addRating({ movieId: movie.id, rating, comment });
-  };
 
   return (
     <div className="min-h-screen">
@@ -148,12 +183,12 @@ const MovieDetailsPage: React.FC = () => {
       </div>
 
       {/* Rating Modal */}
-      <RatingModal
-        isOpen={showRatingModal}
-        movie={movie}
-        onClose={() => setShowRatingModal(false)}
-        onSubmit={handleRatingSubmit}
-      />
+      {showRatingModal && (
+        <RatingModal
+          movie={movie}
+          onClose={() => setShowRatingModal(false)}
+        />
+      )}
     </div>
   );
 };
