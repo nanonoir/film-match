@@ -1,1 +1,0 @@
-export { SwipeTutorial } from './SwipeTutorial';

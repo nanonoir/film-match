@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -10,35 +10,154 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// Models will be defined in Fase 1
-// For now, this file is prepared for the database schema.
-
+// ============================================
 // USUARIOS
-// model User {
-//   id        Int      @id @default(autoincrement())
-//   email     String   @unique
-//   username  String?
-//   passwordHash String
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }
+// ============================================
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  username  String?
+  passwordHash String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  // Relaciones
+  ratings UserRating[]
+  collections UserCollection[]
+  chatMessages ChatMessage[]
+
+  @@index([email])
+}
+
+// ============================================
 // PELÍCULAS
-// model Movie {
-//   id            Int      @id @default(autoincrement())
-//   tmdbId        Int      @unique
-//   title         String
-//   overview      String   @db.LongText
-//   releaseDate   DateTime?
-//   posterPath    String?
-//   voteAverage   Decimal  @db.Decimal(3, 1)
-//   createdAt     DateTime @default(now())
-//   updatedAt     DateTime @updatedAt
-// }
+// ============================================
+model Movie {
+  id            Int      @id @default(autoincrement())
+  tmdbId        Int      @unique
+  title         String
+  overview      String?
+  releaseDate   DateTime?
+  posterPath    String?
+  voteAverage   Decimal?  @db.Decimal(3, 1)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  embeddingStatus String @default("pending") // pending, in_progress, completed
 
-// CATEGORÍAS
-// model Category {
-//   id    Int     @id @default(autoincrement())
-//   name  String  @unique
-//   slug  String  @unique
-// }
+  // Relaciones
+  categories MovieCategory[]
+  ratings UserRating[]
+  collections UserCollection[]
+  embeddings MovieEmbedding[]
+
+  @@index([tmdbId])
+  @@index([createdAt])
+}
+
+// ============================================
+// CATEGORÍAS/GÉNEROS
+// ============================================
+model Category {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique
+  slug  String  @unique
+  createdAt DateTime @default(now())
+
+  // Relaciones
+  movies MovieCategory[]
+
+  @@index([slug])
+}
+
+// ============================================
+// RELACIÓN N:M PELÍCULAS Y CATEGORÍAS
+// ============================================
+model MovieCategory {
+  id        Int     @id @default(autoincrement())
+  movieId   Int
+  categoryId Int
+  createdAt DateTime @default(now())
+
+  // Relaciones
+  movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([movieId, categoryId])
+  @@index([movieId])
+  @@index([categoryId])
+}
+
+// ============================================
+// RATINGS DE USUARIOS A PELÍCULAS
+// ============================================
+model UserRating {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  movieId   Int
+  rating    Int      // 1-10
+  review    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, movieId]) // Un usuario solo puede calificar una película una vez
+  @@index([userId])
+  @@index([movieId])
+  @@index([createdAt])
+}
+
+// ============================================
+// COLECCIONES DE USUARIOS
+// ============================================
+model UserCollection {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  movieId   Int
+  type      String   // "favorite", "watchlist", "watched"
+  createdAt DateTime @default(now())
+
+  // Relaciones
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, movieId, type]) // Un usuario no puede tener la misma película en la misma colección dos veces
+  @@index([userId])
+  @@index([movieId])
+  @@index([type])
+}
+
+// ============================================
+// EMBEDDINGS DE PELÍCULAS (Para RAG - Fase 3)
+// ============================================
+model MovieEmbedding {
+  id        Int      @id @default(autoincrement())
+  movieId   Int      @unique
+  vectorId  String   // ID del vector en Pinecone
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@index([movieId])
+}
+
+// ============================================
+// MENSAJES DE CHAT (Para Gemini - Fase 3)
+// ============================================
+model ChatMessage {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  content   String
+  role      String   // "user" o "assistant"
+  createdAt DateTime @default(now())
+
+  // Relaciones
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+}
