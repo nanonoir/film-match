@@ -4,6 +4,11 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { env } from './config/env';
 import authRoutes from './routes/auth.routes';
+import movieRoutes from './routes/movie.routes';
+import ratingRoutes from './routes/rating.routes';
+import collectionRoutes from './routes/collection.routes';
+import userRoutes from './routes/user.routes';
+import categoryRoutes from './routes/category.routes';
 import { errorHandler, notFound } from './middleware/error.middleware';
 
 const app = express();
@@ -51,6 +56,11 @@ app.get('/health', (req, res) => {
 // API Routes
 // ============================================
 app.use('/api/auth', authRoutes);
+app.use('/api/movies', movieRoutes);
+app.use('/api/ratings', ratingRoutes);
+app.use('/api/collections', collectionRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/categories', categoryRoutes);
 
 // ============================================
 // Error Handling (MUST be last)
