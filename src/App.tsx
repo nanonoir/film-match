@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Profile from './pages/Profile';
 import MovieDetailsPage from './pages/MovieDetailsPage';
 import Preferences from './pages/Preferences';
+import Matches from './pages/Matches';
 
 /**
  * App Component
@@ -26,6 +27,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/preferences" element={<Preferences />} />
+            <Route path="/matches" element={<Matches />} />
             <Route path="/movie/:id" element={<MovieDetailsPage />} />
           </Routes>
         </Router>
