@@ -8,9 +8,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Filter } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useMovieRepository, useMovieMatches, useFilterMovies } from '@/hooks';
+import { useUI } from '../../context/ui';
 import type { Movie } from '@core';
 import MovieCardComponent from './MovieCard';
 import MatchModalComponent from './MatchModal';
@@ -35,11 +35,13 @@ const MovieListContainer: React.FC = () => {
   const { filteredMovies, toggleGenre, setYearRange, setMinRating, filterBySearch } =
     useFilterMovies(allMovies);
 
+  // UI Context
+  const { filtersSidebar, closeFiltersSidebar } = useUI();
+
   // Local UI state
   const [currentMovieIndex, setCurrentMovieIndex] = useState(0);
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [matchedMovie, setMatchedMovie] = useState<Movie | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -174,15 +176,15 @@ const MovieListContainer: React.FC = () => {
 
   return (
     <div className="min-h-screen">
-      <div className="pt-24 pb-12 px-4">
-        <div className="max-w-7xl mx-auto">
+      <div className="pt-[80px] pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="w-full sm:max-w-6xl lg:max-w-7xl mx-auto h-[calc(100vh-80px-48px)]">
           {/* Movie Cards Stack */}
-          <div className="flex justify-center items-center min-h-[600px] relative">
+          <div className="flex justify-center items-center h-full relative">
             {currentMovieIndex >= filteredMovies.length ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="card text-center max-w-md"
+                className="card text-center w-full max-w-sm sm:max-w-md"
               >
                 <h2 className="text-2xl font-bold mb-4">
                   ¡No hay más películas para mostrar!
@@ -192,7 +194,10 @@ const MovieListContainer: React.FC = () => {
                 </p>
                 <div className="flex gap-4">
                   <button
-                    onClick={() => setShowFilters(true)}
+                    onClick={() => {
+                      // Use the Filters button from Navbar instead
+                      handleResetMovies();
+                    }}
                     className="btn-primary flex-1"
                   >
                     Ajustar Filtros
@@ -211,13 +216,13 @@ const MovieListContainer: React.FC = () => {
                 {filteredMovies.slice(currentMovieIndex + 1, currentMovieIndex + 3).map((movie, index) => (
                   <div
                     key={movie.id}
-                    className="absolute w-full max-w-md"
+                    className="absolute w-full max-w-[90vw] sm:max-w-md lg:max-w-lg xl:max-w-xl"
                     style={{
                       transform: `translateY(${(index + 1) * 12}px) scale(${1 - (index + 1) * 0.05})`,
                       zIndex: -index - 1,
                     }}
                   >
-                    <div className="h-[600px] rounded-3xl bg-dark-card overflow-hidden shadow-2xl" />
+                    <div className="rounded-3xl bg-dark-card overflow-hidden shadow-2xl" style={{ height: 'clamp(280px, calc(100vh - 160px), 700px)' }} />
                   </div>
                 ))}
 
@@ -247,15 +252,17 @@ const MovieListContainer: React.FC = () => {
       )}
 
       {/* Filters Sidebar */}
-      {showFilters && (
-        <FiltersSidebarComponent
-          onClose={() => setShowFilters(false)}
-          onGenreToggle={toggleGenre}
-          onYearRangeChange={setYearRange}
-          onMinRatingChange={setMinRating}
-          onSearchChange={filterBySearch}
-        />
-      )}
+      <AnimatePresence>
+        {filtersSidebar.isOpen && (
+          <FiltersSidebarComponent
+            onClose={closeFiltersSidebar}
+            onGenreToggle={toggleGenre}
+            onYearRangeChange={setYearRange}
+            onMinRatingChange={setMinRating}
+            onSearchChange={filterBySearch}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

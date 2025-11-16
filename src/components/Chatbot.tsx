@@ -74,7 +74,7 @@ const Chatbot: React.FC = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center shadow-2xl z-40"
+            className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center shadow-2xl z-40"
           >
             <MessageCircle className="w-8 h-8 text-white" />
           </motion.button>
@@ -88,7 +88,7 @@ const Chatbot: React.FC = () => {
             initial={{ opacity: 0, y: 100, scale: 0.8 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 100, scale: 0.8 }}
-            className="fixed bottom-6 right-6 w-96 h-[500px] bg-dark-card rounded-2xl shadow-2xl z-40 flex flex-col"
+            className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-[calc(100vw-2rem)] sm:w-96 h-[70vh] sm:h-[500px] max-h-[600px] bg-dark-card rounded-2xl shadow-2xl z-40 flex flex-col"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-800">

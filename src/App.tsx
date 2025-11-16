@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import MovieDetailsPage from './pages/MovieDetailsPage';
+import Preferences from './pages/Preferences';
 
 /**
  * App Component
@@ -24,6 +25,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/home" element={<Home />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/preferences" element={<Preferences />} />
             <Route path="/movie/:id" element={<MovieDetailsPage />} />
           </Routes>
         </Router>

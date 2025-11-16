@@ -142,7 +142,7 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
         initial={{ x: -400 }}
         animate={{ x: 0 }}
         exit={{ x: -400 }}
-        className="fixed left-0 top-0 bottom-0 w-96 bg-dark-card z-50 overflow-y-auto"
+        className="fixed left-0 top-0 bottom-0 w-full sm:w-96 md:w-[400px] bg-dark-card z-50 overflow-y-auto"
       >
         {/* Header */}
         <div className="sticky top-0 bg-dark-card border-b border-white/10 p-6 flex items-center justify-between">
@@ -180,10 +180,10 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
                 <button
                   key={genre}
                   onClick={() => handleGenreToggle(genre)}
-                  className={`px-4 py-2 rounded-lg transition-all ${
+                  className={`px-4 py-2 rounded-lg transition-all border ${
                     selectedGenres.includes(genre)
-                      ? 'bg-primary text-white'
-                      : 'bg-dark-hover hover:bg-dark-hover/80 text-gray-300'
+                      ? 'bg-primary text-white border-primary-pink'
+                      : 'bg-dark-hover hover:bg-dark-hover/80 text-gray-300 border-gray-600 hover:border-gray-500'
                   }`}
                 >
                   {genre}
@@ -233,10 +233,10 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
                 <button
                   key={rating}
                   onClick={() => handleRatingChange(rating)}
-                  className={`flex-1 px-3 py-2 rounded-lg transition-all ${
+                  className={`flex-1 px-3 py-2 rounded-lg transition-all border ${
                     minRating === rating
-                      ? 'bg-yellow-500 text-white'
-                      : 'bg-dark-hover hover:bg-dark-hover/80 text-gray-300'
+                      ? 'bg-yellow-500 text-white border-yellow-400'
+                      : 'bg-dark-hover hover:bg-dark-hover/80 text-gray-300 border-gray-600 hover:border-gray-500'
                   }`}
                 >
                   {rating === 0 ? 'Cualquiera' : `${rating}+`}
@@ -249,13 +249,13 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
           <div className="flex gap-3 pt-6 border-t border-white/10">
             <button
               onClick={handleResetFilters}
-              className="flex-1 px-4 py-3 rounded-lg bg-dark-hover hover:bg-dark-hover/80 font-semibold transition-all"
+              className="flex-1 px-4 py-3 rounded-lg bg-dark-hover hover:bg-dark-hover/80 font-semibold transition-all border border-gray-600 hover:border-gray-500"
             >
               Restablecer
             </button>
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-3 rounded-lg bg-primary hover:bg-primary/80 font-semibold transition-all"
+              className="flex-1 px-4 py-3 rounded-lg bg-primary hover:bg-primary/80 font-semibold transition-all border border-primary-pink"
             >
               Aplicar
             </button>

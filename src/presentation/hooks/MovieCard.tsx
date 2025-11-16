@@ -8,7 +8,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
-import { Heart, X, Star } from 'lucide-react';
+import { Heart, X, Star, ExternalLink } from 'lucide-react';
 import type { Movie } from '@core';
 
 interface MovieCardProps {
@@ -91,8 +91,8 @@ const MovieCard: React.FC<MovieCardProps> = ({
 
   return (
     <motion.div
-      className="absolute w-full max-w-md h-[600px] cursor-grab active:cursor-grabbing"
-      style={{ x, rotate, opacity }}
+      className="absolute w-full max-w-[90vw] sm:max-w-md lg:max-w-lg xl:max-w-xl cursor-grab active:cursor-grabbing"
+      style={{ x, rotate, opacity, height: 'clamp(280px, calc(100vh - 160px), 700px)' }}
       drag="x"
       dragConstraints={{ left: 0, right: 0 }}
       onDragEnd={handleDragEnd}
@@ -153,20 +153,21 @@ const MovieCard: React.FC<MovieCardProps> = ({
               className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 font-semibold transition-all"
             >
               <X className="w-5 h-5" />
-              Rechazar
+              <span className="hidden sm:inline">Rechazar</span>
             </button>
             <button
               onClick={handleMatch}
               className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-green-500/20 hover:bg-green-500/30 text-green-400 font-semibold transition-all"
             >
               <Heart className="w-5 h-5" />
-              Match
+              <span className="hidden sm:inline">Match</span>
             </button>
             <button
               onClick={onShowDetails}
-              className="px-4 py-3 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 font-semibold transition-all"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 font-semibold transition-all"
             >
-              Detalles
+              <ExternalLink className="w-5 h-5" />
+              <span className="hidden sm:inline">Detalles</span>
             </button>
           </div>
         </div>

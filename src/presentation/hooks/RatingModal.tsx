@@ -99,7 +99,7 @@ const RatingModal: React.FC<RatingModalProps> = ({ movie, onClose, onRatingSubmi
         exit={{ opacity: 0, scale: 0.8 }}
         className="fixed inset-0 z-50 flex items-center justify-center p-4"
       >
-        <div className="relative w-full max-w-md bg-dark-card rounded-2xl overflow-hidden shadow-2xl">
+        <div className="relative w-full max-w-sm sm:max-w-md bg-dark-card rounded-2xl overflow-hidden shadow-2xl">
           {/* Close Button */}
           <button
             onClick={onClose}
@@ -109,13 +109,13 @@ const RatingModal: React.FC<RatingModalProps> = ({ movie, onClose, onRatingSubmi
           </button>
 
           {/* Header */}
-          <div className="bg-gradient-to-br from-yellow-500/20 to-transparent p-8 text-center">
-            <h2 className="text-3xl font-bold mb-2">Califica Esta Película</h2>
-            <p className="text-gray-400">¿Qué piensas sobre {movie.title}?</p>
+          <div className="bg-gradient-to-br from-yellow-500/20 to-transparent p-4 sm:p-8 text-center">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-2">Califica Esta Película</h2>
+            <p className="text-sm sm:text-base text-gray-400">¿Qué piensas sobre {movie.title}?</p>
           </div>
 
           {/* Content */}
-          <div className="p-6 space-y-6">
+          <div className="p-4 sm:p-6 space-y-6">
             {/* Movie Info */}
             <div className="flex gap-4">
               <img

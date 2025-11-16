@@ -4,9 +4,18 @@ import { Film } from 'lucide-react';
 
 const LoginForm: React.FC = () => {
   const navigate = useNavigate();
+  const [isRegister, setIsRegister] = useState(false);
+
+  // Login form states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isRegister, setIsRegister] = useState(false);
+
+  // Register form states
+  const [nickname, setNickname] = useState('');
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [confirmEmail, setConfirmEmail] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,15 +29,15 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center px-3 xs:px-4 sm:px-6 py-6 xs:py-8">
+      <div className="w-full max-w-xs xs:max-w-sm sm:max-w-md overflow-y-auto">
         {/* Logo */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-20 h-20 bg-gradient-primary rounded-3xl flex items-center justify-center mb-4 shadow-lg">
-            <Film className="w-12 h-12 text-white" />
+        <div className="flex flex-col items-center mb-4 xs:mb-6 sm:mb-8">
+          <div className="w-14 xs:w-20 h-14 xs:h-20 bg-gradient-primary rounded-3xl flex items-center justify-center mb-2 xs:mb-4 shadow-lg">
+            <Film className="w-8 xs:w-12 h-8 xs:h-12 text-white" />
           </div>
-          <h1 className="text-4xl font-bold mb-2">FILM-MATCH</h1>
-          <p className="text-gray-400 text-lg">Desliza. Matchea. Mira.</p>
+          <h1 className="text-xl xs:text-3xl sm:text-4xl font-bold mb-1 text-center">FILM-MATCH</h1>
+          <p className="text-gray-400 text-xs sm:text-base text-center">Desliza. Matchea. Mira.</p>
         </div>
 
         {/* Form Card */}
@@ -36,9 +45,9 @@ const LoginForm: React.FC = () => {
           {/* Google Login */}
           <button
             onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center space-x-3 bg-white text-gray-800 font-semibold py-3 px-6 rounded-xl hover:bg-gray-100 transition-colors mb-6"
+            className="w-full flex items-center justify-center space-x-2 xs:space-x-3 bg-white text-gray-800 font-semibold py-2 px-3 xs:px-6 rounded-lg xs:rounded-xl hover:bg-gray-100 transition-colors mb-3 xs:mb-6 text-xs xs:text-sm sm:text-base"
           >
-            <svg className="w-6 h-6" viewBox="0 0 24 24">
+            <svg className="w-5 xs:w-6 h-5 xs:h-6" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -60,51 +69,119 @@ const LoginForm: React.FC = () => {
           </button>
 
           {/* Divider */}
-          <div className="flex items-center my-6">
+          <div className="flex items-center my-3 xs:my-6">
             <div className="flex-1 border-t border-gray-700"></div>
-            <div className="px-4 text-gray-500 text-sm">o</div>
+            <div className="px-2 xs:px-4 text-gray-500 text-xs xs:text-sm">o</div>
             <div className="flex-1 border-t border-gray-700"></div>
           </div>
 
           {/* Email/Password Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Correo Electrónico</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="tu@ejemplo.com"
-                className="input-field"
-                required
-              />
-            </div>
+          <form onSubmit={handleSubmit} className="space-y-3 xs:space-y-4">
+            {isRegister ? (
+              <>
+                {/* Register Form */}
+                <div>
+                  <label className="block text-xs xs:text-sm font-medium mb-1.5 xs:mb-2">Apodo</label>
+                  <input
+                    type="text"
+                    value={nickname}
+                    onChange={(e) => setNickname(e.target.value)}
+                    placeholder="Tu apodo"
+                    className="input-field"
+                    required
+                  />
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">Contraseña</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="input-field"
-                required
-              />
-            </div>
+                <div>
+                  <label className="block text-xs xs:text-sm font-medium mb-1.5 xs:mb-2">Correo Electrónico</label>
+                  <input
+                    type="email"
+                    value={registerEmail}
+                    onChange={(e) => setRegisterEmail(e.target.value)}
+                    placeholder="tu@ejemplo.com"
+                    className="input-field"
+                    required
+                  />
+                </div>
 
-            <button type="submit" className="w-full btn-primary mt-6">
+                <div>
+                  <label className="block text-xs xs:text-sm font-medium mb-1.5 xs:mb-2">Confirmar Correo</label>
+                  <input
+                    type="email"
+                    value={confirmEmail}
+                    onChange={(e) => setConfirmEmail(e.target.value)}
+                    placeholder="tu@ejemplo.com"
+                    className="input-field"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs xs:text-sm font-medium mb-1.5 xs:mb-2">Contraseña</label>
+                  <input
+                    type="password"
+                    value={registerPassword}
+                    onChange={(e) => setRegisterPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="input-field"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs xs:text-sm font-medium mb-1.5 xs:mb-2">Confirmar Contraseña</label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="input-field"
+                    required
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Login Form */}
+                <div>
+                  <label className="block text-xs xs:text-sm font-medium mb-1.5 xs:mb-2">Correo Electrónico</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="tu@ejemplo.com"
+                    className="input-field"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs xs:text-sm font-medium mb-1.5 xs:mb-2">Contraseña</label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="input-field"
+                    required
+                  />
+                </div>
+              </>
+            )}
+
+            <button type="submit" className="w-full btn-primary mt-3 xs:mt-6 py-2 text-xs xs:text-sm sm:text-base rounded-lg xs:rounded-xl">
               {isRegister ? 'Registrarse' : 'Iniciar Sesión'}
             </button>
           </form>
 
           {/* Toggle Register/Login */}
-          <div className="text-center mt-6">
-            <span className="text-gray-400">
+          <div className="text-center mt-3 xs:mt-6">
+            <span className="text-gray-400 text-xs xs:text-sm">
               {isRegister ? '¿Ya tienes cuenta?' : "¿No tienes cuenta?"}{' '}
             </span>
             <button
               onClick={() => setIsRegister(!isRegister)}
-              className="text-primary-purple hover:underline font-semibold"
+              className="text-primary-purple hover:underline font-semibold text-xs xs:text-sm"
             >
               {isRegister ? 'Iniciar Sesión' : 'Registrarse'}
             </button>

@@ -67,7 +67,7 @@ export function ProfileEditModal({ onClose }: ProfileEditModalProps) {
           <label className="block text-sm font-semibold text-gray-300 mb-3">
             Elige tu Avatar
           </label>
-          <div className="grid grid-cols-5 gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
             {AVAILABLE_AVATARS.map((avatar) => (
               <button
                 key={avatar.id}

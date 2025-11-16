@@ -21,7 +21,7 @@ const InfoButton: React.FC = () => {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={openTutorial}
-        className="fixed bottom-28 right-6 w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center shadow-2xl z-40 hover:shadow-cyan-500/50 transition-shadow"
+        className="fixed bottom-6 left-6 w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center shadow-2xl z-30 hover:shadow-cyan-500/50 transition-shadow"
         aria-label="Mostrar tutorial"
       >
         <Info className="w-7 h-7 text-white" />
