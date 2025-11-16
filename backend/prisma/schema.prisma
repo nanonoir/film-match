@@ -1,0 +1,44 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Models will be defined in Fase 1
+// For now, this file is prepared for the database schema.
+
+// USUARIOS
+// model User {
+//   id        Int      @id @default(autoincrement())
+//   email     String   @unique
+//   username  String?
+//   passwordHash String
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+
+// PELÍCULAS
+// model Movie {
+//   id            Int      @id @default(autoincrement())
+//   tmdbId        Int      @unique
+//   title         String
+//   overview      String   @db.LongText
+//   releaseDate   DateTime?
+//   posterPath    String?
+//   voteAverage   Decimal  @db.Decimal(3, 1)
+//   createdAt     DateTime @default(now())
+//   updatedAt     DateTime @updatedAt
+// }
+
+// CATEGORÍAS
+// model Category {
+//   id    Int     @id @default(autoincrement())
+//   name  String  @unique
+//   slug  String  @unique
+// }
