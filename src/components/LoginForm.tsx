@@ -27,8 +27,8 @@ const LoginForm: React.FC = () => {
           <div className="w-20 h-20 bg-gradient-primary rounded-3xl flex items-center justify-center mb-4 shadow-lg">
             <Film className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-4xl font-bold mb-2">MovieMatch</h1>
-          <p className="text-gray-400 text-lg">Swipe. Match. Watch.</p>
+          <h1 className="text-4xl font-bold mb-2">FILM-MATCH</h1>
+          <p className="text-gray-400 text-lg">Desliza. Matchea. Mira.</p>
         </div>
 
         {/* Form Card */}
@@ -69,19 +69,19 @@ const LoginForm: React.FC = () => {
           {/* Email/Password Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Email</label>
+              <label className="block text-sm font-medium mb-2">Correo Electrónico</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                placeholder="tu@ejemplo.com"
                 className="input-field"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Password</label>
+              <label className="block text-sm font-medium mb-2">Contraseña</label>
               <input
                 type="password"
                 value={password}
@@ -93,20 +93,20 @@ const LoginForm: React.FC = () => {
             </div>
 
             <button type="submit" className="w-full btn-primary mt-6">
-              {isRegister ? 'Register' : 'Login'}
+              {isRegister ? 'Registrarse' : 'Iniciar Sesión'}
             </button>
           </form>
 
           {/* Toggle Register/Login */}
           <div className="text-center mt-6">
             <span className="text-gray-400">
-              {isRegister ? 'Already have an account?' : "Don't have an account?"}{' '}
+              {isRegister ? '¿Ya tienes cuenta?' : "¿No tienes cuenta?"}{' '}
             </span>
             <button
               onClick={() => setIsRegister(!isRegister)}
               className="text-primary-purple hover:underline font-semibold"
             >
-              {isRegister ? 'Login' : 'Register'}
+              {isRegister ? 'Iniciar Sesión' : 'Registrarse'}
             </button>
           </div>
         </div>

@@ -97,7 +97,7 @@ const Chatbot: React.FC = () => {
                   <MessageCircle className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold">Asistente MovieMatch</h3>
+                  <h3 className="font-semibold">Asistente Film-Match</h3>
                   <p className="text-xs text-gray-400">Siempre disponible</p>
                 </div>
               </div>

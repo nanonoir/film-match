@@ -19,14 +19,14 @@ interface FiltersSidebarProps {
 }
 
 const GENRES = [
-  'Action',
-  'Comedy',
+  'Acción',
+  'Comedia',
   'Drama',
-  'Horror',
-  'Sci-Fi',
-  'Thriller',
+  'Terror',
+  'Ciencia Ficción',
+  'Suspenso',
   'Romance',
-  'Animation',
+  'Animación',
 ];
 
 const YEARS = {
@@ -148,7 +148,7 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
         <div className="sticky top-0 bg-dark-card border-b border-white/10 p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Sliders className="w-6 h-6" />
-            <h2 className="text-2xl font-bold">Filters</h2>
+            <h2 className="text-2xl font-bold">Filtros</h2>
           </div>
           <button
             onClick={onClose}
@@ -162,10 +162,10 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
         <div className="p-6 space-y-8">
           {/* Search */}
           <div>
-            <label className="block text-sm font-semibold mb-3">Search</label>
+            <label className="block text-sm font-semibold mb-3">Buscar</label>
             <input
               type="text"
-              placeholder="Search movies..."
+              placeholder="Buscar películas..."
               value={searchQuery}
               onChange={(e) => handleSearchInput(e.target.value)}
               className="w-full px-4 py-2 bg-dark-hover rounded-lg border border-white/10 focus:border-primary outline-none transition-all"
@@ -174,7 +174,7 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
 
           {/* Genres */}
           <div>
-            <label className="block text-sm font-semibold mb-3">Genres</label>
+            <label className="block text-sm font-semibold mb-3">Géneros</label>
             <div className="grid grid-cols-2 gap-2">
               {GENRES.map((genre) => (
                 <button
@@ -195,11 +195,11 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
           {/* Year Range */}
           <div>
             <label className="block text-sm font-semibold mb-3">
-              Year Range: {yearRange[0]} - {yearRange[1]}
+              Rango de Años: {yearRange[0]} - {yearRange[1]}
             </label>
             <div className="space-y-3">
               <div>
-                <label className="text-xs text-gray-400 mb-1 block">From</label>
+                <label className="text-xs text-gray-400 mb-1 block">Desde</label>
                 <input
                   type="range"
                   min={YEARS.min}
@@ -210,7 +210,7 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-400 mb-1 block">To</label>
+                <label className="text-xs text-gray-400 mb-1 block">Hasta</label>
                 <input
                   type="range"
                   min={YEARS.min}
@@ -226,7 +226,7 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
           {/* Minimum Rating */}
           <div>
             <label className="block text-sm font-semibold mb-3">
-              Minimum Rating: {minRating > 0 ? minRating : 'Any'}⭐
+              Calificación Mínima: {minRating > 0 ? minRating : 'Cualquiera'}⭐
             </label>
             <div className="flex gap-2">
               {[0, ...RATINGS].map((rating) => (
@@ -239,7 +239,7 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
                       : 'bg-dark-hover hover:bg-dark-hover/80 text-gray-300'
                   }`}
                 >
-                  {rating === 0 ? 'Any' : `${rating}+`}
+                  {rating === 0 ? 'Cualquiera' : `${rating}+`}
                 </button>
               ))}
             </div>
@@ -251,13 +251,13 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
               onClick={handleResetFilters}
               className="flex-1 px-4 py-3 rounded-lg bg-dark-hover hover:bg-dark-hover/80 font-semibold transition-all"
             >
-              Reset
+              Restablecer
             </button>
             <button
               onClick={onClose}
               className="flex-1 px-4 py-3 rounded-lg bg-primary hover:bg-primary/80 font-semibold transition-all"
             >
-              Apply
+              Aplicar
             </button>
           </div>
         </div>

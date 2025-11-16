@@ -136,7 +136,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
               <p className="text-sm">{movie.director}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-400 uppercase">Cast</p>
+              <p className="text-xs text-gray-400 uppercase">Reparto</p>
               <p className="text-sm">{movie.cast.slice(0, 3).join(', ')}</p>
             </div>
           </div>
@@ -153,7 +153,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
               className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 font-semibold transition-all"
             >
               <X className="w-5 h-5" />
-              Skip
+              Rechazar
             </button>
             <button
               onClick={handleMatch}
@@ -166,7 +166,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
               onClick={onShowDetails}
               className="px-4 py-3 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 font-semibold transition-all"
             >
-              Details
+              Detalles
             </button>
           </div>
         </div>

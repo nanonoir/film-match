@@ -51,7 +51,7 @@ const RatingModal: React.FC<RatingModalProps> = ({ movie, onClose, onRatingSubmi
    */
   const handleSubmitRating = async () => {
     if (rating === 0) {
-      setError('Please select a rating');
+      setError('Por favor selecciona una calificación');
       return;
     }
 
@@ -73,7 +73,7 @@ const RatingModal: React.FC<RatingModalProps> = ({ movie, onClose, onRatingSubmi
 
       onClose();
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to submit rating';
+      const errorMsg = err instanceof Error ? err.message : 'Error al enviar la calificación';
       setError(errorMsg);
       console.error('Error submitting rating:', err);
     } finally {
@@ -110,8 +110,8 @@ const RatingModal: React.FC<RatingModalProps> = ({ movie, onClose, onRatingSubmi
 
           {/* Header */}
           <div className="bg-gradient-to-br from-yellow-500/20 to-transparent p-8 text-center">
-            <h2 className="text-3xl font-bold mb-2">Rate This Movie</h2>
-            <p className="text-gray-400">What do you think about {movie.title}?</p>
+            <h2 className="text-3xl font-bold mb-2">Califica Esta Película</h2>
+            <p className="text-gray-400">¿Qué piensas sobre {movie.title}?</p>
           </div>
 
           {/* Content */}
@@ -132,7 +132,7 @@ const RatingModal: React.FC<RatingModalProps> = ({ movie, onClose, onRatingSubmi
 
             {/* Rating Stars */}
             <div className="text-center">
-              <label className="block text-sm font-semibold mb-4">Your Rating</label>
+              <label className="block text-sm font-semibold mb-4">Tu Calificación</label>
               <div className="flex justify-center gap-3">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <motion.button
@@ -155,20 +155,20 @@ const RatingModal: React.FC<RatingModalProps> = ({ movie, onClose, onRatingSubmi
               </div>
               {rating > 0 && (
                 <p className="mt-3 text-sm text-gray-400">
-                  {rating === 1 && 'Not my cup of tea'}
-                  {rating === 2 && 'Could be better'}
-                  {rating === 3 && 'Pretty good'}
-                  {rating === 4 && 'Really enjoyed it'}
-                  {rating === 5 && 'Absolutely loved it!'}
+                  {rating === 1 && 'No es mi tipo'}
+                  {rating === 2 && 'Podría ser mejor'}
+                  {rating === 3 && 'Bastante buena'}
+                  {rating === 4 && 'Me gustó mucho'}
+                  {rating === 5 && '¡La amé!'}
                 </p>
               )}
             </div>
 
             {/* Comment */}
             <div>
-              <label className="block text-sm font-semibold mb-3">Comment (Optional)</label>
+              <label className="block text-sm font-semibold mb-3">Comentario (Opcional)</label>
               <textarea
-                placeholder="Share your thoughts about this movie..."
+                placeholder="Comparte tus pensamientos sobre esta película..."
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 maxLength={500}
@@ -192,14 +192,14 @@ const RatingModal: React.FC<RatingModalProps> = ({ movie, onClose, onRatingSubmi
                 disabled={isSubmitting}
                 className="flex-1 px-4 py-3 rounded-lg bg-dark-hover hover:bg-dark-hover/80 font-semibold transition-all disabled:opacity-50"
               >
-                Cancel
+                Cancelar
               </button>
               <button
                 onClick={handleSubmitRating}
                 disabled={isSubmitting || rating === 0}
                 className="flex-1 px-4 py-3 rounded-lg bg-yellow-600 hover:bg-yellow-700 font-semibold transition-all disabled:opacity-50"
               >
-                {isSubmitting ? 'Submitting...' : 'Submit Rating'}
+                {isSubmitting ? 'Enviando...' : 'Enviar Calificación'}
               </button>
             </div>
           </div>

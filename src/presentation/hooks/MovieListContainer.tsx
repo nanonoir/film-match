@@ -138,7 +138,7 @@ const MovieListContainer: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading movies...</p>
+          <p>Cargando películas...</p>
         </div>
       </div>
     );
@@ -149,12 +149,12 @@ const MovieListContainer: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-500 mb-4">Error loading movies: {error.message}</p>
+          <p className="text-red-500 mb-4">Error al cargar películas: {error.message}</p>
           <button
             onClick={() => window.location.reload()}
             className="btn-primary"
           >
-            Retry
+            Reintentar
           </button>
         </div>
       </div>
@@ -166,7 +166,7 @@ const MovieListContainer: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-400 mb-4">No movies available</p>
+          <p className="text-gray-400 mb-4">No hay películas disponibles</p>
         </div>
       </div>
     );
@@ -176,23 +176,6 @@ const MovieListContainer: React.FC = () => {
     <div className="min-h-screen">
       <div className="pt-24 pb-12 px-4">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Discover Movies</h1>
-              <p className="text-gray-400">
-                Swipe right to match, left to skip ({currentMovieIndex + 1} / {filteredMovies.length})
-              </p>
-            </div>
-            <button
-              onClick={() => setShowFilters(true)}
-              className="flex items-center space-x-2 px-4 py-2 bg-dark-card rounded-xl hover:bg-opacity-80 transition-all"
-            >
-              <Filter className="w-5 h-5" />
-              <span>Filters</span>
-            </button>
-          </div>
-
           {/* Movie Cards Stack */}
           <div className="flex justify-center items-center min-h-[600px] relative">
             {currentMovieIndex >= filteredMovies.length ? (
@@ -202,23 +185,23 @@ const MovieListContainer: React.FC = () => {
                 className="card text-center max-w-md"
               >
                 <h2 className="text-2xl font-bold mb-4">
-                  No more movies to show!
+                  ¡No hay más películas para mostrar!
                 </h2>
                 <p className="text-gray-400 mb-6">
-                  You've seen {filteredMovies.length} movies. Try adjusting your filters or check back later.
+                  Has visto {filteredMovies.length} películas. Intenta ajustar tus filtros o vuelve más tarde.
                 </p>
                 <div className="flex gap-4">
                   <button
                     onClick={() => setShowFilters(true)}
                     className="btn-primary flex-1"
                   >
-                    Adjust Filters
+                    Ajustar Filtros
                   </button>
                   <button
                     onClick={handleResetMovies}
                     className="btn-secondary flex-1"
                   >
-                    Start Over
+                    Comenzar de Nuevo
                   </button>
                 </div>
               </motion.div>
@@ -250,20 +233,6 @@ const MovieListContainer: React.FC = () => {
                 )}
               </>
             )}
-          </div>
-
-          {/* Match stats */}
-          <div className="mt-12 flex justify-center gap-8">
-            <div className="text-center">
-              <p className="text-sm text-gray-400 mb-2">Matches</p>
-              <p className="text-3xl font-bold">{matches.length}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-gray-400 mb-2">Remaining</p>
-              <p className="text-3xl font-bold">
-                {Math.max(0, filteredMovies.length - currentMovieIndex)}
-              </p>
-            </div>
           </div>
         </div>
       </div>

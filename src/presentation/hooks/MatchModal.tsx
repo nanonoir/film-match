@@ -73,8 +73,8 @@ const MatchModal: React.FC<MatchModalProps> = ({ movie, onClose, onViewDetails }
             >
               💚
             </motion.div>
-            <h2 className="text-3xl font-bold mb-2">It's a Match!</h2>
-            <p className="text-gray-400">You've successfully added this movie to your favorites</p>
+            <h2 className="text-3xl font-bold mb-2">¡Es un Match!</h2>
+            <p className="text-gray-400">Has agregado exitosamente esta película a tus matches</p>
           </div>
 
           {/* Movie Preview */}
@@ -102,15 +102,15 @@ const MatchModal: React.FC<MatchModalProps> = ({ movie, onClose, onViewDetails }
             {/* Stats */}
             <div className="grid grid-cols-3 gap-4 py-4 border-t border-white/10">
               <div className="text-center">
-                <p className="text-xs text-gray-400 mb-1">Rating</p>
+                <p className="text-xs text-gray-400 mb-1">Calificación</p>
                 <p className="text-lg font-bold">{movie.rating}⭐</p>
               </div>
               <div className="text-center">
-                <p className="text-xs text-gray-400 mb-1">Duration</p>
+                <p className="text-xs text-gray-400 mb-1">Duración</p>
                 <p className="text-lg font-bold">{movie.duration}</p>
               </div>
               <div className="text-center">
-                <p className="text-xs text-gray-400 mb-1">Year</p>
+                <p className="text-xs text-gray-400 mb-1">Año</p>
                 <p className="text-lg font-bold">{movie.year}</p>
               </div>
             </div>
@@ -121,14 +121,14 @@ const MatchModal: React.FC<MatchModalProps> = ({ movie, onClose, onViewDetails }
                 onClick={onClose}
                 className="flex-1 px-4 py-3 rounded-xl bg-dark-hover hover:bg-dark-hover/80 font-semibold transition-all"
               >
-                Keep Swiping
+                Continuar Deslizando
               </button>
               <button
                 onClick={onViewDetails}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 font-semibold transition-all"
               >
                 <ExternalLink className="w-4 h-4" />
-                View Details
+                Ver Detalles
               </button>
             </div>
           </div>

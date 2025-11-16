@@ -20,7 +20,7 @@ const Navbar: React.FC = () => {
             <div className="w-12 h-12 bg-gradient-primary rounded-2xl flex items-center justify-center">
               <Film className="w-7 h-7 text-white" />
             </div>
-            <span className="text-xl font-bold">MovieMatch</span>
+            <span className="text-xl font-bold">Film-Match</span>
           </Link>
 
           <div className="flex items-center space-x-6">
@@ -29,7 +29,7 @@ const Navbar: React.FC = () => {
               className="flex items-center space-x-2 hover:text-primary-pink transition-colors"
             >
               <Film className="w-5 h-5" />
-              <span className="hidden sm:inline">Discover</span>
+              <span className="hidden sm:inline">Descubrir</span>
             </Link>
             <Link
               to="/matches"
@@ -40,7 +40,7 @@ const Navbar: React.FC = () => {
             </Link>
             <button className="flex items-center space-x-2 hover:text-primary-pink transition-colors">
               <Search className="w-5 h-5" />
-              <span className="hidden sm:inline">Search</span>
+              <span className="hidden sm:inline">Buscar</span>
             </button>
 
             {/* Divider */}
