@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Film } from 'lucide-react';
+import { useUser } from '../context/user/useUser';
 
 const LoginForm: React.FC = () => {
   const navigate = useNavigate();
+  const { login, loginWithGoogle, register } = useUser();
   const [isRegister, setIsRegister] = useState(false);
 
   // Login form states
@@ -17,15 +19,41 @@ const LoginForm: React.FC = () => {
   const [registerPassword, setRegisterPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulación de login - sin backend real
-    navigate('/home');
+    try {
+      if (isRegister) {
+        // Validar que los emails coincidan
+        if (registerEmail !== confirmEmail) {
+          alert('Los correos no coinciden');
+          return;
+        }
+        // Validar que las contraseñas coincidan
+        if (registerPassword !== confirmPassword) {
+          alert('Las contraseñas no coinciden');
+          return;
+        }
+        await register(registerEmail, registerPassword);
+      } else {
+        await login(email, password);
+      }
+      // Navegar al home después de que el login se complete
+      navigate('/home');
+    } catch (error) {
+      console.error('Auth error:', error);
+      alert('Error en la autenticación');
+    }
   };
 
-  const handleGoogleLogin = () => {
-    // Simulación de login con Google
-    navigate('/home');
+  const handleGoogleLogin = async () => {
+    try {
+      await loginWithGoogle();
+      // Navegar al home después de que el login se complete
+      navigate('/home');
+    } catch (error) {
+      console.error('Google login error:', error);
+      alert('Error al iniciar sesión con Google');
+    }
   };
 
   return (

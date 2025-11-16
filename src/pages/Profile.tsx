@@ -3,7 +3,7 @@
  * Página de perfil del usuario con información personal y reseñas
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Settings, Edit2, Twitter, Instagram, Star } from 'lucide-react';
@@ -25,8 +25,15 @@ interface MovieReview {
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { user, isAuthenticated, loading } = useUser();
   const { profileEditModalOpen, openProfileEditModal, closeProfileEditModal } = useUI();
+
+  // Redirect to login only if explicitly not authenticated
+  useEffect(() => {
+    if (isAuthenticated === false) {
+      navigate('/login', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   // Cargar reseñas directamente desde el JSON
   const reviews = useMemo(() => {
@@ -44,9 +51,9 @@ const Profile: React.FC = () => {
       .filter((review): review is MovieReview => review !== null);
   }, []);
 
-  // Always have a user in mock mode, so no need for guards
-  if (!user) {
-    return null; // Should never happen with mock user
+  // Don't render if still loading or user is not available
+  if (loading || !user) {
+    return null;
   }
 
   const avatarImage = getAvatarImage(user.avatar);
