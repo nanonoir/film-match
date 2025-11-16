@@ -7,6 +7,7 @@ import Profile from './pages/Profile';
 import MovieDetailsPage from './pages/MovieDetailsPage';
 import Preferences from './pages/Preferences';
 import Matches from './pages/Matches';
+import Search from './pages/Search';
 
 /**
  * App Component
@@ -28,6 +29,7 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/preferences" element={<Preferences />} />
             <Route path="/matches" element={<Matches />} />
+            <Route path="/search" element={<Search />} />
             <Route path="/movie/:id" element={<MovieDetailsPage />} />
           </Routes>
         </Router>

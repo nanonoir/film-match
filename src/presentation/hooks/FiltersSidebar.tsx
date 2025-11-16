@@ -15,7 +15,6 @@ interface FiltersSidebarProps {
   onGenreToggle: (genre: string) => void;
   onYearRangeChange: (min: number, max: number) => void;
   onMinRatingChange: (rating: number) => void;
-  onSearchChange: (query: string) => void;
 }
 
 const GENRES = [
@@ -34,7 +33,7 @@ const YEARS = {
   max: new Date().getFullYear(),
 };
 
-const RATINGS = [1, 2, 3, 4, 5];
+const RATINGS = [1, 2, 3, 4];
 
 /**
  * FiltersSidebar Component
@@ -44,7 +43,6 @@ const RATINGS = [1, 2, 3, 4, 5];
  * @param onGenreToggle - Callback when genre is toggled
  * @param onYearRangeChange - Callback when year range changes
  * @param onMinRatingChange - Callback when min rating changes
- * @param onSearchChange - Callback when search query changes
  *
  * @example
  * ```typescript
@@ -54,7 +52,6 @@ const RATINGS = [1, 2, 3, 4, 5];
  *     onGenreToggle={handleGenreToggle}
  *     onYearRangeChange={handleYearChange}
  *     onMinRatingChange={handleRatingChange}
- *     onSearchChange={handleSearchChange}
  *   />
  * )}
  * ```
@@ -64,13 +61,11 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
   onGenreToggle,
   onYearRangeChange,
   onMinRatingChange,
-  onSearchChange,
 }) => {
   // Local state for filter values
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [yearRange, setYearRange] = useState<[number, number]>([YEARS.min, YEARS.max]);
   const [minRating, setMinRating] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
 
   /**
    * Handle genre toggle
@@ -106,24 +101,14 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
   };
 
   /**
-   * Handle search input
-   */
-  const handleSearchInput = (value: string) => {
-    setSearchQuery(value);
-    onSearchChange(value);
-  };
-
-  /**
    * Reset all filters
    */
   const handleResetFilters = () => {
     setSelectedGenres([]);
     setYearRange([YEARS.min, YEARS.max]);
     setMinRating(0);
-    setSearchQuery('');
     onYearRangeChange(YEARS.min, YEARS.max);
     onMinRatingChange(0);
-    onSearchChange('');
   };
 
   return (
@@ -160,18 +145,6 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
 
         {/* Filters Content */}
         <div className="p-6 space-y-8">
-          {/* Search */}
-          <div>
-            <label className="block text-sm font-semibold mb-3">Buscar</label>
-            <input
-              type="text"
-              placeholder="Buscar películas..."
-              value={searchQuery}
-              onChange={(e) => handleSearchInput(e.target.value)}
-              className="w-full px-4 py-2 bg-dark-hover rounded-lg border border-white/10 focus:border-primary outline-none transition-all"
-            />
-          </div>
-
           {/* Genres */}
           <div>
             <label className="block text-sm font-semibold mb-3">Géneros</label>

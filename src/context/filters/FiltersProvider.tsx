@@ -6,7 +6,15 @@
  */
 
 import React, { useReducer, useCallback, useEffect, ReactNode } from 'react';
-import { FiltersContext, initialFiltersState, defaultCriteria, type FiltersState } from './FiltersContext';
+import {
+  FiltersContext,
+  initialFiltersState,
+  defaultCriteria,
+  type FiltersState,
+  type SortOption,
+  type TrendOption,
+  type DecadeOption,
+} from './FiltersContext';
 import type { MovieFilterCriteria } from '@core';
 
 const STORAGE_KEY = 'film-match:filters';
@@ -22,7 +30,12 @@ type FiltersAction =
   | { type: 'UPDATE_YEAR_RANGE'; payload: [number, number] }
   | { type: 'UPDATE_MIN_RATING'; payload: number }
   | { type: 'RESET_FILTERS' }
-  | { type: 'RESET_FILTER'; payload: keyof MovieFilterCriteria };
+  | { type: 'RESET_FILTER'; payload: keyof MovieFilterCriteria }
+  | { type: 'SET_SORT_BY'; payload: SortOption }
+  | { type: 'SET_TREND'; payload: TrendOption }
+  | { type: 'SET_DECADE'; payload: DecadeOption }
+  | { type: 'SET_CURRENT_PAGE'; payload: number }
+  | { type: 'SET_TOTAL_RESULTS'; payload: number };
 
 /**
  * Check if filters are active
@@ -112,8 +125,42 @@ function filtersReducer(state: FiltersState, action: FiltersAction): FiltersStat
           break;
       }
       return {
+        ...state,
         criteria: newCriteria,
         isActive: checkIsActive(newCriteria),
+      };
+
+    case 'SET_SORT_BY':
+      return {
+        ...state,
+        sortBy: action.payload,
+        pagination: { ...state.pagination, currentPage: 1 },
+      };
+
+    case 'SET_TREND':
+      return {
+        ...state,
+        trend: action.payload,
+        pagination: { ...state.pagination, currentPage: 1 },
+      };
+
+    case 'SET_DECADE':
+      return {
+        ...state,
+        decade: action.payload,
+        pagination: { ...state.pagination, currentPage: 1 },
+      };
+
+    case 'SET_CURRENT_PAGE':
+      return {
+        ...state,
+        pagination: { ...state.pagination, currentPage: action.payload },
+      };
+
+    case 'SET_TOTAL_RESULTS':
+      return {
+        ...state,
+        pagination: { ...state.pagination, totalResults: action.payload },
       };
 
     default:
@@ -195,6 +242,26 @@ export const FiltersProvider: React.FC<FiltersProviderProps> = ({ children }) =>
     dispatch({ type: 'RESET_FILTER', payload: filterType });
   }, []);
 
+  const setSortBy = useCallback((sort: SortOption) => {
+    dispatch({ type: 'SET_SORT_BY', payload: sort });
+  }, []);
+
+  const setTrend = useCallback((trend: TrendOption) => {
+    dispatch({ type: 'SET_TREND', payload: trend });
+  }, []);
+
+  const setDecade = useCallback((decade: DecadeOption) => {
+    dispatch({ type: 'SET_DECADE', payload: decade });
+  }, []);
+
+  const setCurrentPage = useCallback((page: number) => {
+    dispatch({ type: 'SET_CURRENT_PAGE', payload: page });
+  }, []);
+
+  const setTotalResults = useCallback((total: number) => {
+    dispatch({ type: 'SET_TOTAL_RESULTS', payload: total });
+  }, []);
+
   const value = {
     ...state,
     setCriteria,
@@ -205,6 +272,11 @@ export const FiltersProvider: React.FC<FiltersProviderProps> = ({ children }) =>
     updateMinRating,
     resetFilters,
     resetFilter,
+    setSortBy,
+    setTrend,
+    setDecade,
+    setCurrentPage,
+    setTotalResults,
   };
 
   return (

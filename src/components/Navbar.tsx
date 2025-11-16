@@ -48,10 +48,13 @@ const Navbar: React.FC = () => {
                 <span className="hidden sm:inline">Filtros</span>
               </button>
             )}
-            <button className="flex items-center space-x-2 hover:text-primary-pink transition-colors">
+            <Link
+              to="/search"
+              className="flex items-center space-x-2 hover:text-primary-pink transition-colors"
+            >
               <Search className="w-5 h-5" />
               <span className="hidden sm:inline">Buscar</span>
-            </button>
+            </Link>
 
             {/* Divider */}
             <div className="hidden sm:block h-6 w-px bg-gray-700"></div>

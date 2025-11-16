@@ -12,11 +12,39 @@ import { createContext } from 'react';
 import type { MovieFilterCriteria } from '@core';
 
 /**
+ * Pagination State Interface
+ */
+export interface PaginationState {
+  currentPage: number;
+  itemsPerPage: number;
+  totalResults: number;
+}
+
+/**
+ * Sort Options
+ */
+export type SortOption = 'title' | 'rating' | 'date';
+
+/**
+ * Trend Filter Options
+ */
+export type TrendOption = 'all' | 'trending' | 'recent' | 'oldest';
+
+/**
+ * Decade Filter Options
+ */
+export type DecadeOption = 'all' | '70s' | '80s' | '90s' | '00s' | '10s' | '20s';
+
+/**
  * Filters State Interface
  */
 export interface FiltersState {
   criteria: MovieFilterCriteria;
   isActive: boolean;
+  pagination: PaginationState;
+  sortBy: SortOption;
+  trend: TrendOption;
+  decade: DecadeOption;
 }
 
 /**
@@ -31,6 +59,11 @@ export interface FiltersActions {
   updateMinRating: (rating: number) => void;
   resetFilters: () => void;
   resetFilter: (filterType: keyof MovieFilterCriteria) => void;
+  setSortBy: (sort: SortOption) => void;
+  setTrend: (trend: TrendOption) => void;
+  setDecade: (decade: DecadeOption) => void;
+  setCurrentPage: (page: number) => void;
+  setTotalResults: (total: number) => void;
 }
 
 /**
@@ -54,6 +87,14 @@ export const defaultCriteria: MovieFilterCriteria = {
 export const initialFiltersState: FiltersState = {
   criteria: defaultCriteria,
   isActive: false,
+  pagination: {
+    currentPage: 1,
+    itemsPerPage: 10,
+    totalResults: 0,
+  },
+  sortBy: 'title',
+  trend: 'all',
+  decade: 'all',
 };
 
 /**
