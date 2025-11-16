@@ -14,19 +14,22 @@ generator client {
 // USUARIOS
 // ============================================
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  username  String?
-  passwordHash String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               Int      @id @default(autoincrement())
+  email            String   @unique
+  username         String?
+  passwordHash     String
+  googleId         String?  @unique  // Para Google OAuth
+  profilePicture   String?  // Avatar del usuario
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   // Relaciones
-  ratings UserRating[]
-  collections UserCollection[]
-  chatMessages ChatMessage[]
+  ratings          UserRating[]
+  collections      UserCollection[]
+  chatMessages     ChatMessage[]
 
   @@index([email])
+  @@index([googleId])
 }
 
 // ============================================
