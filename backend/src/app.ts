@@ -9,6 +9,7 @@ import ratingRoutes from './routes/rating.routes';
 import collectionRoutes from './routes/collection.routes';
 import userRoutes from './routes/user.routes';
 import categoryRoutes from './routes/category.routes';
+import tmdbRoutes from './routes/tmdb.routes';
 import { errorHandler, notFound } from './middleware/error.middleware';
 
 const app = express();
@@ -61,6 +62,7 @@ app.use('/api/ratings', ratingRoutes);
 app.use('/api/collections', collectionRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/tmdb', tmdbRoutes);
 
 // ============================================
 // Error Handling (MUST be last)

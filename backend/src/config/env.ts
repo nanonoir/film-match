@@ -22,6 +22,11 @@ interface EnvConfig {
 
   // Frontend
   frontendUrl: string;
+
+  // TMDB API
+  tmdbApiKey: string;
+  tmdbBaseUrl: string;
+  tmdbImageBaseUrl: string;
 }
 
 /**
@@ -35,7 +40,8 @@ function validateEnv(): EnvConfig {
     'GOOGLE_CLIENT_ID',
     'GOOGLE_CLIENT_SECRET',
     'GOOGLE_REDIRECT_URI',
-    'FRONTEND_URL'
+    'FRONTEND_URL',
+    'TMDB_API_KEY'
   ];
 
   const missing = requiredVars.filter(varName => !process.env[varName]);
@@ -56,7 +62,10 @@ function validateEnv(): EnvConfig {
     googleClientId: process.env.GOOGLE_CLIENT_ID!,
     googleClientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     googleRedirectUri: process.env.GOOGLE_REDIRECT_URI!,
-    frontendUrl: process.env.FRONTEND_URL!
+    frontendUrl: process.env.FRONTEND_URL!,
+    tmdbApiKey: process.env.TMDB_API_KEY!,
+    tmdbBaseUrl: process.env.TMDB_API_BASE_URL || 'https://api.themoviedb.org/3',
+    tmdbImageBaseUrl: process.env.TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p'
   };
 }
 
