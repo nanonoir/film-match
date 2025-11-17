@@ -118,11 +118,11 @@ const MovieCard: React.FC<MovieCardProps> = ({
             <div className="flex-1">
               <h2 className="text-3xl font-bold mb-2">{movie.title}</h2>
               <div className="flex items-center space-x-3 text-sm text-gray-300">
-                <span>{movie.year}</span>
+                <span>{movie.year || 'N/A'}</span>
                 <span>•</span>
-                <span>{movie.genres.join(', ')}</span>
+                <span>{(movie.genres as any)?.join(', ') || 'Sin género'}</span>
                 <span>•</span>
-                <span>{movie.duration}</span>
+                <span>{(movie as any).duration || 'N/A'}</span>
               </div>
             </div>
             <div className="flex items-center space-x-2 bg-black/40 px-3 py-1 rounded-full">
@@ -133,20 +133,26 @@ const MovieCard: React.FC<MovieCardProps> = ({
 
           {/* Director and Cast */}
           <div className="pt-3 border-t border-white/10 space-y-2">
-            <div>
-              <p className="text-xs text-gray-400 uppercase">Director</p>
-              <p className="text-sm">{movie.director}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-400 uppercase">Reparto</p>
-              <p className="text-sm">{movie.cast.slice(0, 3).join(', ')}</p>
-            </div>
+            {(movie as any).director && (
+              <div>
+                <p className="text-xs text-gray-400 uppercase">Director</p>
+                <p className="text-sm">{(movie as any).director}</p>
+              </div>
+            )}
+            {(movie as any).cast && Array.isArray((movie as any).cast) && (
+              <div>
+                <p className="text-xs text-gray-400 uppercase">Reparto</p>
+                <p className="text-sm">{(movie as any).cast.slice(0, 3).join(', ')}</p>
+              </div>
+            )}
           </div>
 
           {/* Description */}
-          <div>
-            <p className="text-sm text-gray-300 line-clamp-2">{movie.overview}</p>
-          </div>
+          {(movie as any).overview && (
+            <div>
+              <p className="text-sm text-gray-300 line-clamp-2">{(movie as any).overview}</p>
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex gap-4 pt-4">

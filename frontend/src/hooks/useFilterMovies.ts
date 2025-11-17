@@ -57,11 +57,32 @@ export function useFilterMovies(initialMovies: Movie[]) {
    * Apply filters when criteria or movies change
    */
   useEffect(() => {
-    applyFilters();
-  }, [criteria, initialMovies]);
+    const applyFiltersSync = () => {
+      setLoading(true);
+      try {
+        const useCase = get<FilterMoviesUseCase>(DI_TOKENS.FILTER_MOVIES_USE_CASE);
+
+        // Create filter entity
+        const filter = MovieFilter.create(criteria);
+
+        // Execute filtering
+        const results = useCase.execute(initialMovies, filter);
+        setFilteredMovies(results);
+        setError(null);
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setError(error);
+        console.error('Error applying filters:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    applyFiltersSync();
+  }, [criteria, initialMovies, get]);
 
   /**
-   * Apply current filters to movies
+   * Apply current filters to movies (memoized for external use)
    */
   const applyFilters = useCallback(async (): Promise<void> => {
     setLoading(true);
