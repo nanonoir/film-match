@@ -8,6 +8,7 @@
 
 import React, { useCallback, ReactNode } from 'react';
 import { useAuth } from '@/hooks/api';
+import { authService } from '@/api/services/auth.service';
 import { UserContext, initialUserState, type UserProfile } from './UserContext';
 
 /**
@@ -42,19 +43,39 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         id: String(currentUser.id),
         email: currentUser.email,
         name: currentUser.name || currentUser.username || 'Usuario',
-        nickname: currentUser.username || 'usuario',
-        avatar: currentUser.picture || undefined,
-        bio: undefined,
-        twitterUrl: undefined,
-        instagramUrl: undefined,
-        createdAt: new Date(currentUser.createdAt),
+        nickname: currentUser.nickname || currentUser.username || 'usuario',
+        avatar: currentUser.profilePicture || currentUser.picture || undefined,
+        bio: currentUser.bio || undefined,
+        twitterUrl: currentUser.twitterUrl || undefined,
+        instagramUrl: currentUser.instagramUrl || undefined,
+        createdAt: currentUser.createdAt ? new Date(currentUser.createdAt) : new Date(),
       } as UserProfile
     : null;
 
-  // Maintain backward compatibility with old API
-  const updateProfile = useCallback((_profile: Partial<UserProfile>) => {
-    // In the future, this could call an API endpoint to update user profile
-    console.log('Profile update not yet implemented with API');
+  // Update user profile by calling backend API
+  const updateProfile = useCallback(async (profile: Partial<UserProfile>) => {
+    try {
+      console.log('📝 Updating profile:', profile);
+
+      // Map UserProfile to API format
+      const updateData = {
+        nickname: profile.nickname,
+        bio: profile.bio,
+        profilePicture: profile.avatar, // Map avatar to profilePicture for API
+        twitterUrl: profile.twitterUrl,
+        instagramUrl: profile.instagramUrl,
+      };
+
+      // Call backend API
+      await authService.updateUserProfile(updateData);
+
+      // The useAuth hook will automatically refetch the user via React Query
+      // because the PUT request triggers a cache invalidation or refetch
+      console.log('✅ Profile updated successfully');
+    } catch (error) {
+      console.error('❌ Error updating profile:', error);
+      throw error;
+    }
   }, []);
 
   // Map React Query state to the old context interface

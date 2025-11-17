@@ -47,20 +47,43 @@ export const useAuth = () => {
   // Mutation: Login with Google
   const loginWithGoogleMutation = useMutation({
     mutationFn: async (payload: GoogleAuthPayload) => {
+      console.log('🔐 useAuth - Calling loginWithGoogle with token');
+      console.log('🔐 useAuth - Incoming Google token type:', typeof payload.token);
       const response = await authService.loginWithGoogle(payload.token);
+      console.log('🔐 useAuth - Response from loginWithGoogle:', {
+        hasAccessToken: !!response.accessToken,
+        accessTokenLength: response.accessToken?.length,
+        accessTokenType: typeof response.accessToken,
+        accessTokenPreview: response.accessToken?.substring(0, 50),
+        hasUser: !!response.user,
+        hasRefreshToken: !!response.refreshToken,
+        fullResponse: response
+      });
+
+      // DEFENSIVE: Check if accessToken is actually a valid JWT before storing
+      if (!response.accessToken || typeof response.accessToken !== 'string') {
+        console.error('🔐 useAuth - ERROR: accessToken is missing or not a string!', {
+          accessToken: response.accessToken,
+          type: typeof response.accessToken
+        });
+        throw new Error('Invalid response: accessToken is missing or not a string');
+      }
+
       // Store tokens immediately after successful login
       TokenManager.setTokens(response.accessToken, response.refreshToken);
       return response;
     },
     onSuccess: (response: LoginResponse) => {
-      // Invalidate and refetch current user
-      queryClient.invalidateQueries({
+      console.log('🔐 useAuth - Login successful, setting user data and refetching');
+      // Set the initial user data from login response
+      queryClient.setQueryData(queryKeys.auth.currentUser(), response.user);
+      // Refetch current user from /users/me to ensure all fields are fresh and correct
+      queryClient.refetchQueries({
         queryKey: queryKeys.auth.currentUser(),
       });
-      // Set new user data in cache
-      queryClient.setQueryData(queryKeys.auth.currentUser(), response.user);
     },
     onError: (error: any) => {
+      console.error('🔐 useAuth - Login failed:', error);
       // Clear tokens on login failure
       TokenManager.clearTokens();
     },
@@ -107,7 +130,8 @@ export const useAuth = () => {
     isLoadingAuthUrl,
 
     // Authentication status
-    isAuthenticated: TokenManager.isAuthenticated(),
+    // isAuthenticated is true if we have a valid token AND successfully loaded user data
+    isAuthenticated: TokenManager.isAuthenticated() && !!currentUser,
     isTokenExpired: TokenManager.isTokenExpired(),
 
     // Mutations
