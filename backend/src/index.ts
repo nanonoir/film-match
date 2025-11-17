@@ -13,6 +13,7 @@
 import express, { Express, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import { corsOptions, requestLogger, errorHandler } from './shared/middleware/index.js';
+import ragRouter from './routes/rag.routes.js';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -57,8 +58,8 @@ app.get('/api/health', (req: Request, res: Response) => {
 // TODO: Agregar rutas de usuario (Fase 2B)
 // app.use('/api/users', userRoutes);
 
-// TODO: Agregar rutas de chat (Fase 3B)
-// app.use('/api/chat', chatRoutes);
+// RAG Routes (Fase 3B)
+app.use('/api/rag', ragRouter);
 
 /**
  * Manejo de rutas no encontradas
@@ -91,14 +92,19 @@ const server = app.listen(PORT, () => {
   🗄️  Database: ${process.env.DATABASE_URL ? 'Configured' : 'Not configured'}
 
   Available endpoints:
-    GET  /api/health         (Health check)
+    GET  /api/health                    (Health check)
+    POST /api/rag/search                (Semantic search)
+    GET  /api/rag/similar/:movieId      (Similar movies)
+    GET  /api/rag/suggestions           (Popular suggestions)
+    GET  /api/rag/recommendations       (Recommendations - Coming soon)
+    POST /api/rag/chat                  (Chat - Coming soon)
 
   Status:
     ✓ Express server initialized
-    ⏳ Awaiting database configuration (Fase 1)
-    ⏳ Awaiting authentication routes (Fase 2A)
-    ⏳ Awaiting API routes (Fase 2B)
-    ⏳ Awaiting chat routes (Fase 3B)
+    ✓ Pinecone integration ready (Fase 3A)
+    ✓ Semantic search endpoints ready (Fase 3B.1)
+    ⏳ Awaiting recommendations (Fase 3B.2)
+    ⏳ Awaiting Gemini chat integration (Fase 3B.3)
 `);
 });
 

@@ -27,6 +27,14 @@ interface EnvConfig {
   tmdbApiKey: string;
   tmdbBaseUrl: string;
   tmdbImageBaseUrl: string;
+
+  // Pinecone (Vector Database)
+  pineconeApiKey?: string;
+  pineconeEnvironment?: string;
+  pineconeIndexName?: string;
+
+  // Gemini API (RAG)
+  geminiApiKey?: string;
 }
 
 /**
@@ -65,7 +73,11 @@ function validateEnv(): EnvConfig {
     frontendUrl: process.env.FRONTEND_URL!,
     tmdbApiKey: process.env.TMDB_API_KEY!,
     tmdbBaseUrl: process.env.TMDB_API_BASE_URL || 'https://api.themoviedb.org/3',
-    tmdbImageBaseUrl: process.env.TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p'
+    tmdbImageBaseUrl: process.env.TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p',
+    pineconeApiKey: process.env.PINECONE_API_KEY,
+    pineconeEnvironment: process.env.PINECONE_ENVIRONMENT || 'us-east-1',
+    pineconeIndexName: process.env.PINECONE_INDEX_NAME || 'film-match',
+    geminiApiKey: process.env.GEMINI_API_KEY
   };
 }
 

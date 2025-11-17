@@ -110,6 +110,8 @@ model UserRating {
   @@index([userId])
   @@index([movieId])
   @@index([createdAt])
+  @@index([userId, rating]) // Para filtros por usuario y rating
+  @@index([rating]) // Para recomendaciones por rating
 }
 
 // ============================================
@@ -152,15 +154,23 @@ model MovieEmbedding {
 // MENSAJES DE CHAT (Para Gemini - Fase 3)
 // ============================================
 model ChatMessage {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  content   String
-  role      String   // "user" o "assistant"
-  createdAt DateTime @default(now())
+  id                 Int       @id @default(autoincrement())
+  userId             Int
+  content            String    @db.Text
+  role               String    // "user" o "assistant"
+  conversationId     String?   // Para agrupar mensajes en conversaciones
+  tokensUsed         Int?      // Tokens gastados por Gemini
+  recommendedMovies  String?   @db.Text // JSON array de películas recomendadas
+  contextSource      String?   // "hybrid", "vector", "metadata", "direct"
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   // Relaciones
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([conversationId])
   @@index([createdAt])
+  @@index([userId, conversationId]) // Para recuperar historial de conversación
+  @@index([userId, createdAt]) // Para recuperar últimos mensajes del usuario
 }

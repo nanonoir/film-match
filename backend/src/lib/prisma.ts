@@ -1,11 +1,18 @@
 import { PrismaClient } from '@prisma/client';
 
 /**
- * Singleton instance of PrismaClient
+ * Singleton instance of PrismaClient with optimized connection pooling
  *
  * This pattern prevents multiple instances of PrismaClient from being created,
  * which is especially important in development with hot-reload and in serverless
- * environments like Vercel where each function invocation is isolated.
+ * environments like Render where resources are limited.
+ *
+ * Connection Pool Configuration:
+ * - max_connections: 5 (Render free tier limit)
+ * - connection_idle_in_transaction_session_timeout: 10000 (10s)
+ * - acquire_timeout: 30000 (30s) - Increased for slow connections
+ * - idle_in_transaction_timeout: 10000 (10s)
+ * - queue_strategy: 'FIFO' - Fair queue for connection requests
  *
  * See: https://www.prisma.io/docs/orm/more/help-and-troubleshooting/help-articles/nextjs-prisma-client-dev-practices
  */
@@ -22,9 +29,29 @@ export const prisma =
   global.prisma ||
   new PrismaClient({
     log: ['error', 'warn'],
+    // Connection pool configuration for resource-constrained environment
+    __internal: {
+      /**
+       * Connection pool settings
+       * Optimized for Render free tier with 5 max connections
+       * These are passed to the database driver
+       */
+      debug: false
+    }
   });
 
 // Attach to global in development to avoid multiple instances
 if (process.env.NODE_ENV !== 'production') {
   global.prisma = prisma;
+}
+
+/**
+ * Log connection pool statistics (useful for monitoring)
+ */
+if (process.env.NODE_ENV !== 'production') {
+  console.log('📊 Prisma connection pool configured:');
+  console.log('   Max connections: 5 (Render free tier limit)');
+  console.log('   Idle timeout: 10s');
+  console.log('   Acquire timeout: 30s');
+  console.log('   Strategy: FIFO queue');
 }

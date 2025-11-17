@@ -1,6 +1,7 @@
 import app from './app';
 import { env } from './config/env';
 import { prisma } from './lib/prisma';
+import { initializePineconeService } from './config/pinecone.config';
 
 const PORT = env.port;
 
@@ -9,6 +10,14 @@ async function startServer() {
     // Verificar conexión a BD
     await prisma.$connect();
     console.log('✅ Database connected');
+
+    // Inicializar Pinecone (Fase 3B)
+    try {
+      await initializePineconeService();
+      console.log('✅ Pinecone connected');
+    } catch (error) {
+      console.warn('⚠️  Pinecone initialization skipped (may need API key):', error instanceof Error ? error.message : String(error));
+    }
 
     // Iniciar servidor
     app.listen(PORT, () => {
