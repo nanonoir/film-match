@@ -31,8 +31,40 @@ import FiltersSidebarComponent from './FiltersSidebar';
 const MovieListContainer: React.FC = () => {
   const navigate = useNavigate();
 
-  // Get movies from React Query hook (includes mapping from DTO to Movie entity)
-  const { movies: allMovies, isLoadingMovies, moviesError } = useMovies(undefined, true);
+  // Filter state
+  const [filterParams, setFilterParams] = React.useState<{
+    genres: string[];
+    year: number | null;
+    minRating: number;
+  }>({
+    genres: [],
+    year: null,
+    minRating: 0,
+  });
+
+  // Get movies from React Query hook with current filters
+  const queryParams = React.useMemo(() => {
+    const params: any = {};
+
+    // Solo incluir parámetros que tienen valores reales
+    if (filterParams.genres.length > 0) {
+      params.category = filterParams.genres[0]; // Backend uses 'category' parameter, already receives slug
+      console.log('🎯 Filter by category:', params.category);
+    }
+    if (filterParams.year) {
+      params.year = filterParams.year;
+      console.log('🎯 Filter by year:', params.year);
+    }
+    if (filterParams.minRating > 0) {
+      params.minRating = filterParams.minRating;
+      console.log('🎯 Filter by minRating:', params.minRating);
+    }
+
+    console.log('📤 queryParams:', params);
+    return Object.keys(params).length > 0 ? params : undefined;
+  }, [filterParams]);
+
+  const { movies: allMovies, isLoadingMovies, moviesError } = useMovies(queryParams, true);
 
   // Get ratings hook for submitting ratings (don't load all ratings to avoid rate limiting)
   const { createOrUpdateRating, isCreatingRating } = useRatings(false);
@@ -40,13 +72,18 @@ const MovieListContainer: React.FC = () => {
   // State management using custom hooks
   const { matches, addMatch } = useMovieMatches();
 
-  // For now, use allMovies directly without filtering to avoid Clean Architecture issues
-  // TODO: Refactor FilterMoviesUseCase to work with DTO objects
+  // Use filtered movies from API
   const filteredMovies = allMovies;
-  const toggleGenre = () => {};
-  const setYearRange = () => {};
-  const setMinRating = () => {};
-  const filterBySearch = () => {};
+
+  // Filter callbacks
+  const applyFilters = (filters: { genre: string; year: number | null; minRating: number }) => {
+    console.log('✅ Applying filters:', filters);
+    setFilterParams(prev => ({
+      genres: filters.genre ? [filters.genre] : [],
+      year: filters.year,
+      minRating: filters.minRating,
+    }));
+  };
 
   // UI Context
   const { filtersSidebar, closeFiltersSidebar } = useUI();
@@ -56,6 +93,11 @@ const MovieListContainer: React.FC = () => {
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [matchedMovie, setMatchedMovie] = useState<Movie | null>(null);
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
+
+  // Reset movie index when filters change
+  React.useEffect(() => {
+    setCurrentMovieIndex(0);
+  }, [queryParams]);
 
   /**
    * Get current movie to display
@@ -189,24 +231,33 @@ const MovieListContainer: React.FC = () => {
     );
   }
 
-  // No movies state
-  if (allMovies.length === 0) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-400 mb-4">No hay películas disponibles</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen">
       <div className="pt-[80px] pb-12 px-4 sm:px-6 lg:px-8">
         <div className="w-full sm:max-w-6xl lg:max-w-7xl mx-auto h-[calc(100vh-80px-48px)]">
           {/* Movie Cards Stack */}
           <div className="flex justify-center items-center h-full relative">
-            {currentMovieIndex >= filteredMovies.length ? (
+            {allMovies.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="card text-center w-full max-w-sm sm:max-w-md"
+              >
+                <h2 className="text-2xl font-bold mb-4">No hay películas disponibles</h2>
+                <p className="text-gray-400 mb-6">
+                  Intenta ajustar tus filtros para encontrar películas.
+                </p>
+                <button
+                  onClick={() => {
+                    // Reset filters
+                    setFilterParams({ genres: [], year: null, minRating: 0 });
+                  }}
+                  className="btn-primary"
+                >
+                  Limpiar Filtros
+                </button>
+              </motion.div>
+            ) : currentMovieIndex >= filteredMovies.length ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -283,10 +334,7 @@ const MovieListContainer: React.FC = () => {
         {filtersSidebar.isOpen && (
           <FiltersSidebarComponent
             onClose={closeFiltersSidebar}
-            onGenreToggle={toggleGenre}
-            onYearRangeChange={setYearRange}
-            onMinRatingChange={setMinRating}
-            onSearchChange={filterBySearch}
+            onApplyFilters={applyFilters}
           />
         )}
       </AnimatePresence>

@@ -26,7 +26,7 @@ export interface MovieDTO {
 export interface MovieQueryParams {
   page?: number;
   limit?: number;
-  genre?: string;
+  category?: string;  // Category slug (e.g., 'accion', 'comedia')
   year?: number;
   minRating?: number;
   sortBy?: 'popularity' | 'release_date' | 'vote_average' | 'title';

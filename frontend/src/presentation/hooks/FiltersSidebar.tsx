@@ -12,9 +12,7 @@ import { X, Sliders } from 'lucide-react';
 
 interface FiltersSidebarProps {
   onClose: () => void;
-  onGenreToggle: (genre: string) => void;
-  onYearRangeChange: (min: number, max: number) => void;
-  onMinRatingChange: (rating: number) => void;
+  onApplyFilters: (filters: { genre: string; year: number | null; minRating: number }) => void;
 }
 
 const GENRES = [
@@ -28,12 +26,25 @@ const GENRES = [
   'Animación',
 ];
 
-const YEARS = {
-  min: 1970,
-  max: new Date().getFullYear(),
+// Mapeo de géneros a slugs (para enviar al backend)
+const GENRE_SLUGS: Record<string, string> = {
+  'Acción': 'accion',
+  'Comedia': 'comedia',
+  'Drama': 'drama',
+  'Terror': 'terror',
+  'Ciencia Ficción': 'ciencia-ficcion',
+  'Suspenso': 'suspenso',
+  'Romance': 'romance',
+  'Animación': 'animacion',
 };
 
-const RATINGS = [1, 2, 3, 4];
+const CURRENT_YEAR = new Date().getFullYear();
+const YEARS_LIST = Array.from(
+  { length: CURRENT_YEAR - 1970 + 1 },
+  (_, i) => CURRENT_YEAR - i
+).sort((a, b) => a - b);
+
+const RATINGS = [4, 6, 8, 9];
 
 /**
  * FiltersSidebar Component
@@ -58,46 +69,53 @@ const RATINGS = [1, 2, 3, 4];
  */
 const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
   onClose,
-  onGenreToggle,
-  onYearRangeChange,
-  onMinRatingChange,
+  onApplyFilters,
 }) => {
   // Local state for filter values
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-  const [yearRange, setYearRange] = useState<[number, number]>([YEARS.min, YEARS.max]);
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [minRating, setMinRating] = useState(0);
 
   /**
-   * Handle genre toggle
+   * Handle genre toggle - Solo actualiza estado local
    */
   const handleGenreToggle = (genre: string) => {
-    const updated = selectedGenres.includes(genre)
+    const isSelected = selectedGenres.includes(genre);
+    const updated = isSelected
       ? selectedGenres.filter((g) => g !== genre)
-      : [...selectedGenres, genre];
+      : [genre];
     setSelectedGenres(updated);
-    onGenreToggle(genre);
   };
 
   /**
-   * Handle year range change
+   * Handle year change - Solo actualiza estado local
    */
-  const handleYearChange = (type: 'min' | 'max', value: number) => {
-    const newRange: [number, number] = [...yearRange];
-    if (type === 'min') {
-      newRange[0] = Math.min(value, yearRange[1]);
-    } else {
-      newRange[1] = Math.max(value, yearRange[0]);
-    }
-    setYearRange(newRange);
-    onYearRangeChange(newRange[0], newRange[1]);
+  const handleYearChange = (year: number | null) => {
+    setSelectedYear(year);
   };
 
   /**
-   * Handle rating change
+   * Handle rating change - Solo actualiza estado local
    */
   const handleRatingChange = (rating: number) => {
     setMinRating(rating);
-    onMinRatingChange(rating);
+  };
+
+  /**
+   * Handle apply filters - Aplica los filtros y cierra el sidebar
+   */
+  const handleApplyFilters = () => {
+    const genreSlug = selectedGenres.length > 0
+      ? (GENRE_SLUGS[selectedGenres[0]] || selectedGenres[0].toLowerCase())
+      : '';
+
+    onApplyFilters({
+      genre: genreSlug,
+      year: selectedYear,
+      minRating: minRating,
+    });
+
+    onClose();
   };
 
   /**
@@ -105,10 +123,8 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
    */
   const handleResetFilters = () => {
     setSelectedGenres([]);
-    setYearRange([YEARS.min, YEARS.max]);
+    setSelectedYear(null);
     setMinRating(0);
-    onYearRangeChange(YEARS.min, YEARS.max);
-    onMinRatingChange(0);
   };
 
   return (
@@ -165,41 +181,29 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
             </div>
           </div>
 
-          {/* Year Range */}
+          {/* Year Selection */}
           <div>
             <label className="block text-sm font-semibold mb-3">
-              Rango de Años: {yearRange[0]} - {yearRange[1]}
+              Año: {selectedYear ? selectedYear : 'Cualquiera'}
             </label>
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs text-gray-400 mb-1 block">Desde</label>
-                <input
-                  type="range"
-                  min={YEARS.min}
-                  max={YEARS.max}
-                  value={yearRange[0]}
-                  onChange={(e) => handleYearChange('min', parseInt(e.target.value))}
-                  className="w-full"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-gray-400 mb-1 block">Hasta</label>
-                <input
-                  type="range"
-                  min={YEARS.min}
-                  max={YEARS.max}
-                  value={yearRange[1]}
-                  onChange={(e) => handleYearChange('max', parseInt(e.target.value))}
-                  className="w-full"
-                />
-              </div>
-            </div>
+            <select
+              value={selectedYear || ''}
+              onChange={(e) => handleYearChange(e.target.value ? parseInt(e.target.value) : null)}
+              className="w-full px-4 py-2 rounded-lg bg-dark-hover text-white border border-gray-600 focus:border-primary-pink focus:outline-none transition-colors"
+            >
+              <option value="">Todos los años</option>
+              {YEARS_LIST.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Minimum Rating */}
           <div>
             <label className="block text-sm font-semibold mb-3">
-              Calificación Mínima: {minRating > 0 ? minRating : 'Cualquiera'}⭐
+              Calificación Mínima: {minRating > 0 ? `Más de ${minRating}` : 'Cualquiera'}⭐
             </label>
             <div className="flex gap-2">
               {[0, ...RATINGS].map((rating) => (
@@ -212,7 +216,7 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
                       : 'bg-dark-hover hover:bg-dark-hover/80 text-gray-300 border-gray-600 hover:border-gray-500'
                   }`}
                 >
-                  {rating === 0 ? 'Cualquiera' : `${rating}+`}
+                  {rating === 0 ? 'Cualquiera' : `${rating}+⭐`}
                 </button>
               ))}
             </div>
@@ -227,7 +231,7 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
               Restablecer
             </button>
             <button
-              onClick={onClose}
+              onClick={handleApplyFilters}
               className="flex-1 px-4 py-3 rounded-lg bg-primary hover:bg-primary/80 font-semibold transition-all border border-primary-pink"
             >
               Aplicar
