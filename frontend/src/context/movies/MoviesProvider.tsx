@@ -65,8 +65,8 @@ interface MoviesProviderProps {
  */
 export const MoviesProvider: React.FC<MoviesProviderProps> = ({ children }) => {
   // Get server state from React Query
-  // Disable by default - will be enabled only in appropriate routes
-  const { moviesData, isLoadingMovies, moviesError } = useMovies(undefined, false);
+  // Enabled: Load movies on mount (Home page needs them)
+  const { moviesData, isLoadingMovies, moviesError } = useMovies(undefined, true);
 
   // Local navigation state
   const [navState, dispatch] = useReducer(moviesReducer, { currentMovieIndex: 0 });

@@ -6,10 +6,11 @@
  * Uses custom hooks for all state and data management
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useMovieRepository, useMovieMatches, useFilterMovies } from '@/hooks';
+import { useMovies } from '@/hooks/api';
+import { useMovieMatches, useFilterMovies } from '@/hooks';
 import { useUI } from '../../context/ui';
 import type { Movie } from '@core';
 import MovieCardComponent from './MovieCard';
@@ -19,6 +20,7 @@ import FiltersSidebarComponent from './FiltersSidebar';
 /**
  * Movie List Container Component
  * Main component for discovering and swiping through movies
+ * Now uses React Query for server state management
  *
  * @example
  * ```typescript
@@ -28,10 +30,14 @@ import FiltersSidebarComponent from './FiltersSidebar';
 const MovieListContainer: React.FC = () => {
   const navigate = useNavigate();
 
+  // Get movies from React Query hook
+  const { moviesData, isLoadingMovies, moviesError } = useMovies(undefined, true);
+
+  // Convert DTOs to Movie type for local use
+  const allMovies: Movie[] = (moviesData?.data || []) as unknown as Movie[];
+
   // State management using custom hooks
-  const { getAll, loading: repoLoading } = useMovieRepository();
   const { matches, addMatch } = useMovieMatches();
-  const [allMovies, setAllMovies] = useState<Movie[]>([]);
   const { filteredMovies, toggleGenre, setYearRange, setMinRating, filterBySearch } =
     useFilterMovies(allMovies);
 
@@ -42,30 +48,6 @@ const MovieListContainer: React.FC = () => {
   const [currentMovieIndex, setCurrentMovieIndex] = useState(0);
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [matchedMovie, setMatchedMovie] = useState<Movie | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  /**
-   * Load all movies on component mount
-   */
-  useEffect(() => {
-    const loadMovies = async () => {
-      try {
-        setLoading(true);
-        const movies = await getAll();
-        setAllMovies(movies);
-        setError(null);
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-        console.error('Error loading movies:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadMovies();
-  }, [getAll]);
 
   /**
    * Get current movie to display
@@ -135,7 +117,7 @@ const MovieListContainer: React.FC = () => {
   };
 
   // Loading state
-  if (loading) {
+  if (isLoadingMovies) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -147,11 +129,11 @@ const MovieListContainer: React.FC = () => {
   }
 
   // Error state
-  if (error) {
+  if (moviesError) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-500 mb-4">Error al cargar películas: {error.message}</p>
+          <p className="text-red-500 mb-4">Error al cargar películas: {moviesError.message || 'Unknown error'}</p>
           <button
             onClick={() => window.location.reload()}
             className="btn-primary"
