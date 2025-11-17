@@ -18,6 +18,9 @@ export interface MovieDTO {
   inWatched?: boolean;
   inFavorites?: boolean;
   categories?: Array<{ id: number; name: string; slug: string }>;
+  // Campos adicionales para detalles
+  userRatingsCount?: number;
+  userRatingsAverage?: number | null;
 }
 
 /**

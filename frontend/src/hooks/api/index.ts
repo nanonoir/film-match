@@ -1,5 +1,8 @@
 export { useAuth } from './useAuth';
 export { useMovies } from './useMovies';
+export { useMovie } from './useMovie';
+export { useMovieSearch } from './useMovieSearch';
 export { useRatings } from './useRatings';
 export { useCollections } from './useCollections';
 export { useRAGChat } from './useRAGChat';
+export { useUserReviews } from './useUserReviews';

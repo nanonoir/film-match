@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { motion } from 'framer-motion';
@@ -6,63 +6,48 @@ import { ArrowLeft, Star, MessageCircle } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import RatingModal from '../presentation/hooks/RatingModal';
 import MovieReviewsModal from '../presentation/hooks/MovieReviewsModal';
-import { useMovieRepository } from '@/hooks';
-import type { Movie } from '@core';
+import { useMovie } from '@/hooks/api';
+import type { MovieDTO } from '@/api/types';
+
+// Helper function to convert Decimal to number
+const toNumber = (value: any): number => {
+  if (typeof value === 'number') return value;
+  if (typeof value === 'string') return parseFloat(value);
+  if (value && typeof value === 'object' && 'toString' in value) return parseFloat(value.toString());
+  return 0;
+};
 
 const MovieDetailsPage: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getById, loading, error } = useMovieRepository();
-  const [movie, setMovie] = useState<Movie | null>(null);
+  const movieId = parseInt(id || '0');
+  const { movie, isLoading, isError } = useMovie(movieId || undefined, movieId > 0);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [showReviewsModal, setShowReviewsModal] = useState(false);
-  const [notFound, setNotFound] = useState(false);
 
-  // Load movie on mount
-  useEffect(() => {
-    const loadMovie = async () => {
-      try {
-        const movieId = parseInt(id || '0');
-        if (movieId === 0) {
-          setNotFound(true);
-          return;
-        }
-
-        const loadedMovie = await getById(movieId);
-        if (loadedMovie) {
-          setMovie(loadedMovie);
-        } else {
-          setNotFound(true);
-        }
-      } catch (err) {
-        console.error('Error loading movie:', err);
-        setNotFound(true);
-      }
-    };
-
-    loadMovie();
-  }, [id, getById]);
+  // Memoize converted vote average to avoid recalculating
+  const voteAverage = useMemo(() => movie ? toNumber(movie.voteAverage) : null, [movie]);
 
   // Loading state
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-dark-bg flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading movie...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-pink mx-auto mb-4"></div>
+          <p className="text-gray-300">Cargando película...</p>
         </div>
       </div>
     );
   }
 
   // Error state
-  if (error || notFound || !movie) {
+  if (isError || !movie) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-dark-bg flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Movie not found</h2>
+          <h2 className="text-2xl font-bold mb-4 text-white">Película no encontrada</h2>
           <button onClick={() => navigate('/home')} className="btn-primary">
-            Go Back
+            Volver
           </button>
         </div>
       </div>
@@ -77,7 +62,7 @@ const MovieDetailsPage: React.FC = () => {
         {/* Hero Section */}
         <div className="relative h-56 xs:h-72 sm:h-96 overflow-hidden">
           <img
-            src={movie.poster}
+            src={movie.backdropPath ? `https://image.tmdb.org/t/p/w1280${movie.backdropPath}` : (movie.posterPath ? `https://image.tmdb.org/t/p/w1280${movie.posterPath}` : '')}
             alt={movie.title}
             className="w-full h-full object-cover"
           />
@@ -86,7 +71,7 @@ const MovieDetailsPage: React.FC = () => {
           {/* Back Button */}
           <button
             onClick={() => navigate(-1)}
-            className="absolute top-3 xs:top-4 sm:top-6 left-3 xs:left-4 sm:left-6 w-10 xs:w-12 h-10 xs:h-12 bg-dark-card/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-dark-card transition-all"
+            className="absolute top-3 xs:top-4 sm:top-6 left-3 xs:left-4 sm:left-6 z-10 w-10 xs:w-12 h-10 xs:h-12 bg-dark-card/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-dark-card transition-all"
           >
             <ArrowLeft className="w-5 xs:w-6 h-5 xs:h-6" />
           </button>
@@ -106,11 +91,21 @@ const MovieDetailsPage: React.FC = () => {
                   {movie.title}
                 </h1>
                 <div className="flex flex-wrap items-center gap-2 xs:gap-3 text-gray-400 text-xs xs:text-sm sm:text-base">
-                  <span>{movie.year}</span>
-                  <span>•</span>
-                  <span className="line-clamp-1">{movie.genres.join(', ')}</span>
-                  <span>•</span>
-                  <span>{movie.duration}</span>
+                  {movie.releaseDate && (
+                    <>
+                      <span>{new Date(movie.releaseDate).getFullYear()}</span>
+                      <span>•</span>
+                    </>
+                  )}
+                  {movie.categories && movie.categories.length > 0 && (
+                    <>
+                      <span className="line-clamp-1">{movie.categories.map(c => c.name).join(', ')}</span>
+                      <span>•</span>
+                    </>
+                  )}
+                  {voteAverage && (
+                    <span>{voteAverage.toFixed(1)}/10</span>
+                  )}
                 </div>
               </div>
 
@@ -122,7 +117,7 @@ const MovieDetailsPage: React.FC = () => {
                       <Star
                         key={i}
                         className={`w-5 xs:w-6 h-5 xs:h-6 ${
-                          i < Math.floor(movie.rating)
+                          voteAverage && i < Math.floor(voteAverage / 2)
                             ? 'fill-yellow-400 text-yellow-400'
                             : 'text-gray-600'
                         }`}
@@ -130,8 +125,13 @@ const MovieDetailsPage: React.FC = () => {
                     ))}
                   </div>
                   <span className="text-lg xs:text-xl sm:text-2xl font-bold">
-                    {movie.rating.toFixed(1)} / 5.0
+                    {voteAverage ? (voteAverage / 2).toFixed(1) : 'N/A'} / 5.0
                   </span>
+                  {movie.userRatingsAverage && (
+                    <span className="text-xs xs:text-sm text-gray-400">
+                      ({movie.userRatingsCount} reseñas de usuarios)
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex gap-2 xs:gap-3 flex-wrap">
@@ -158,31 +158,22 @@ const MovieDetailsPage: React.FC = () => {
                 <p className="text-gray-300 leading-relaxed text-sm xs:text-base">{movie.overview}</p>
               </div>
 
-              {/* Details Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 xs:gap-4 sm:gap-6">
-                {/* Director */}
+              {/* Categories Grid */}
+              {movie.categories && movie.categories.length > 0 && (
                 <div className="card p-3 xs:p-4 sm:p-6">
-                  <h3 className="text-base xs:text-lg sm:text-xl font-bold mb-2 xs:mb-3">Director</h3>
-                  <p className="text-primary-purple font-semibold text-sm xs:text-base sm:text-lg">
-                    {movie.director}
-                  </p>
-                </div>
-
-                {/* Cast */}
-                <div className="card p-3 xs:p-4 sm:p-6">
-                  <h3 className="text-base xs:text-lg sm:text-xl font-bold mb-2 xs:mb-3">Cast</h3>
+                  <h3 className="text-base xs:text-lg sm:text-xl font-bold mb-2 xs:mb-3">Géneros</h3>
                   <div className="flex flex-wrap gap-1.5 xs:gap-2">
-                    {movie.cast.map((actor) => (
+                    {movie.categories.map((cat) => (
                       <span
-                        key={actor}
+                        key={cat.id}
                         className="px-2 xs:px-3 py-1 xs:py-1.5 bg-dark-input rounded-lg text-xs xs:text-sm font-medium"
                       >
-                        {actor}
+                        {cat.name}
                       </span>
                     ))}
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Back Button */}
               <div className="text-center py-4 xs:py-6 sm:py-8">
