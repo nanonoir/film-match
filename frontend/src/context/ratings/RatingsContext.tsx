@@ -24,13 +24,20 @@ export interface RatingsState {
  * Ratings Actions Interface
  */
 export interface RatingsActions {
-  addRating: (rating: UserRating) => void;
-  removeRating: (movieId: number) => void;
-  clearRatings: () => void;
+  // Utility functions (computed from ratings data)
   getRatingForMovie: (movieId: number) => UserRating | undefined;
   hasRating: (movieId: number) => boolean;
   getAverageRating: () => number;
   getRatingCount: () => number;
+
+  // React Query mutations
+  createOrUpdateRating?: (data: any) => Promise<any>;
+  deleteRating?: (movieId: number) => Promise<any>;
+
+  // Deprecated actions (for backward compatibility)
+  addRating: (rating: UserRating) => void;
+  removeRating: (movieId: number) => void;
+  clearRatings: () => void;
   setRatings: (ratings: UserRating[]) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: Error | null) => void;

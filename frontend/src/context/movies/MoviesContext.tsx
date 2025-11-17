@@ -26,12 +26,15 @@ export interface MoviesState {
  * Movies Actions Interface
  */
 export interface MoviesActions {
-  setMovies: (movies: Movie[]) => void;
-  setLoading: (loading: boolean) => void;
-  setError: (error: Error | null) => void;
+  // Navigation actions (local state)
   setCurrentMovieIndex: (index: number) => void;
   nextMovie: () => void;
   resetMovieIndex: () => void;
+
+  // Deprecated actions (for backward compatibility - now use useMovies hook)
+  setMovies: (movies: Movie[]) => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: Error | null) => void;
 }
 
 /**

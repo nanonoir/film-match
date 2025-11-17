@@ -11,4 +11,15 @@ export default defineConfig({
       '@core': path.resolve(__dirname, './src/core/index.ts'),
     },
   },
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '/api'),
+        logLevel: 'debug',
+      },
+    },
+  },
 })
