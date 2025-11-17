@@ -66,6 +66,41 @@ class AuthService {
   }
 
   /**
+   * Registrar nuevo usuario con email y contraseña
+   *
+   * @param payload - Email, contraseña y opcionalmente username
+   * @returns Usuario y token
+   */
+  async registerWithEmail(payload: {
+    email: string;
+    password: string;
+    username?: string;
+  }): Promise<LoginResponse> {
+    const response = await apiClient.post<ApiResponse<LoginResponse>>(
+      `${this.basePath}/register`,
+      payload
+    );
+    return response.data.data;
+  }
+
+  /**
+   * Iniciar sesión con email y contraseña
+   *
+   * @param payload - Email y contraseña
+   * @returns Usuario y token
+   */
+  async loginWithEmail(payload: {
+    email: string;
+    password: string;
+  }): Promise<LoginResponse> {
+    const response = await apiClient.post<ApiResponse<LoginResponse>>(
+      `${this.basePath}/login`,
+      payload
+    );
+    return response.data.data;
+  }
+
+  /**
    * Logout (limpiar tokens en cliente)
    * El backend no tiene endpoint logout específico
    */

@@ -17,9 +17,11 @@ model User {
   id               Int      @id @default(autoincrement())
   email            String   @unique
   username         String?
-  passwordHash     String
+  passwordHash     String?  // null para OAuth users, hash para email/password
   googleId         String?  @unique  // Para Google OAuth
+  authProvider     String   @default("local")  // "local", "google", "both"
   profilePicture   String?  // Avatar del usuario
+  isVerified       Boolean  @default(false)  // Para email verification (futuro)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 

@@ -1,6 +1,9 @@
 import { prisma } from '../lib/prisma';
 import { GoogleUserData } from '../types/auth.types';
 import { generateToken } from '../utils/jwt';
+import bcrypt from 'bcryptjs';
+
+const SALT_ROUNDS = 10;
 
 /**
  * Autentica o registra un usuario con datos de Google
@@ -40,7 +43,7 @@ export async function authenticateWithGoogle(googleData: GoogleUserData) {
     }
 
     // Generar JWT
-    const token = generateToken({
+    const accessToken = generateToken({
       userId: user.id.toString(),
       email: user.email
     });
@@ -53,10 +56,118 @@ export async function authenticateWithGoogle(googleData: GoogleUserData) {
         profilePicture: user.profilePicture,
         googleId: user.googleId
       },
-      token
+      accessToken
     };
   } catch (error) {
     console.error('Authentication error:', error);
     throw new Error('Authentication failed');
+  }
+}
+
+/**
+ * Registra un nuevo usuario con email y contraseña
+ * @param email - Email del usuario
+ * @param password - Contraseña en texto plano
+ * @param username - Nombre de usuario (opcional)
+ * @returns Usuario y JWT generado
+ */
+export async function registerWithEmail(email: string, password: string, username?: string) {
+  try {
+    // Verificar si el usuario ya existe
+    const existingUser = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (existingUser) {
+      throw new Error('El email ya está registrado');
+    }
+
+    // Hashear contraseña
+    const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+
+    // Crear usuario
+    const user = await prisma.user.create({
+      data: {
+        email,
+        passwordHash,
+        username: username || email.split('@')[0], // Use part of email as default username
+        authProvider: 'local'
+      }
+    });
+
+    // Generar JWT
+    const accessToken = generateToken({
+      userId: user.id.toString(),
+      email: user.email
+    });
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        profilePicture: user.profilePicture
+      },
+      accessToken
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    console.error('Registration error:', error);
+    throw new Error('Registration failed');
+  }
+}
+
+/**
+ * Inicia sesión con email y contraseña
+ * @param email - Email del usuario
+ * @param password - Contraseña en texto plano
+ * @returns Usuario y JWT generado
+ */
+export async function loginWithEmail(email: string, password: string) {
+  try {
+    // Buscar usuario
+    const user = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (!user) {
+      throw new Error('Email o contraseña incorrectos');
+    }
+
+    // Verificar que tenga passwordHash (para usuarios local)
+    if (!user.passwordHash) {
+      throw new Error('Esta cuenta está registrada con Google. Por favor inicia sesión con Google');
+    }
+
+    // Comparar contraseña
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+
+    if (!isPasswordValid) {
+      throw new Error('Email o contraseña incorrectos');
+    }
+
+    // Generar JWT
+    const accessToken = generateToken({
+      userId: user.id.toString(),
+      email: user.email
+    });
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        profilePicture: user.profilePicture
+      },
+      accessToken
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    console.error('Login error:', error);
+    throw new Error('Login failed');
   }
 }

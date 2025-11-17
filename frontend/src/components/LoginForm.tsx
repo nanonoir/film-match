@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Film } from 'lucide-react';
+import { Film, AlertCircle } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
 import { useGoogleLogin as useGoogleLoginHook } from '@/hooks/auth/useGoogleLogin';
+import { useEmailAuth } from '@/hooks/auth/useEmailAuth';
 
 const LoginForm: React.FC = () => {
   const navigate = useNavigate();
-  const { handleGoogleSuccess: processGoogleToken, handleGoogleError, isLoading } = useGoogleLoginHook();
+  const { handleGoogleSuccess: processGoogleToken, handleGoogleError, isLoading: isGoogleLoading } = useGoogleLoginHook();
+  const { register, login, isLoading: isEmailLoading, error: emailError, clearError } = useEmailAuth();
   const [isRegister, setIsRegister] = useState(false);
   const [googleError, setGoogleError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Login form states
   const [email, setEmail] = useState('');
@@ -21,31 +24,54 @@ const LoginForm: React.FC = () => {
   const [registerPassword, setRegisterPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  const isLoading = isGoogleLoading || isEmailLoading;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
+    clearError();
+
     try {
       if (isRegister) {
         // Validar que los emails coincidan
         if (registerEmail !== confirmEmail) {
-          alert('Los correos no coinciden');
+          setFormError('Los correos electrónicos no coinciden');
           return;
         }
         // Validar que las contraseñas coincidan
         if (registerPassword !== confirmPassword) {
-          alert('Las contraseñas no coinciden');
+          setFormError('Las contraseñas no coinciden');
           return;
         }
-        // TODO: Implementar registro cuando backend lo soporte
-        alert('Registro aún no implementado. Por favor, usa Google Sign-In');
+        // Validar longitud de contraseña
+        if (registerPassword.length < 8) {
+          setFormError('La contraseña debe tener al menos 8 caracteres');
+          return;
+        }
+
+        // Intentar registro
+        const result = await register(registerEmail, registerPassword, nickname || undefined);
+
+        if (result.success) {
+          console.log('✅ Registro exitoso:', result.user);
+          navigate('/home');
+        } else {
+          setFormError(result.error || 'Error al registrarse');
+        }
       } else {
-        // TODO: Implementar login con email/password cuando backend lo soporte
-        alert('Login con email/password aún no implementado. Por favor, usa Google Sign-In');
+        // Intentar login
+        const result = await login(email, password);
+
+        if (result.success) {
+          console.log('✅ Login exitoso:', result.user);
+          navigate('/home');
+        } else {
+          setFormError(result.error || 'Error al iniciar sesión');
+        }
       }
-      // Navegar al home después de que el login se complete
-      // navigate('/home');
     } catch (error) {
       console.error('Auth error:', error);
-      alert('Error en la autenticación');
+      setFormError(error instanceof Error ? error.message : 'Error en la autenticación');
     }
   };
 
@@ -97,10 +123,11 @@ const LoginForm: React.FC = () => {
             />
           </div>
 
-          {/* Error message if Google login failed */}
-          {googleError && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-lg mb-3 xs:mb-6 text-xs xs:text-sm">
-              {googleError}
+          {/* Error messages */}
+          {(googleError || formError) && (
+            <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-2 rounded-lg mb-3 xs:mb-6 text-xs xs:text-sm flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <span>{googleError || formError}</span>
             </div>
           )}
 
@@ -205,8 +232,19 @@ const LoginForm: React.FC = () => {
               </>
             )}
 
-            <button type="submit" className="w-full btn-primary mt-3 xs:mt-6 py-2 text-xs xs:text-sm sm:text-base rounded-lg xs:rounded-xl">
-              {isRegister ? 'Registrarse' : 'Iniciar Sesión'}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full btn-primary mt-3 xs:mt-6 py-2 text-xs xs:text-sm sm:text-base rounded-lg xs:rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              {isLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  {isRegister ? 'Registrando...' : 'Iniciando sesión...'}
+                </span>
+              ) : (
+                isRegister ? 'Registrarse' : 'Iniciar Sesión'
+              )}
             </button>
           </form>
 

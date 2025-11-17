@@ -45,9 +45,12 @@ export const handleApiError = (error: AxiosError): AppError => {
   if (error.response) {
     const data = error.response.data as any;
 
+    // Backend returns { success: false, error: "message" }
+    const errorMessage = data?.error || data?.message || 'An error occurred on the server';
+
     return new AppError(
       data?.code || 'SERVER_ERROR',
-      data?.message || 'An error occurred on the server',
+      errorMessage,
       error.response.status,
       data?.details
     );

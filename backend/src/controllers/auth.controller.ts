@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyGoogleToken, getGoogleAuthURL, getGoogleTokens } from '../services/google-auth.service';
-import { authenticateWithGoogle } from '../services/auth.service';
+import { authenticateWithGoogle, registerWithEmail, loginWithEmail } from '../services/auth.service';
+import { validateRegisterInput, validateLoginInput } from '../validators/auth.validator';
 import { AppError } from '../middleware/error.middleware';
 import { env } from '../config/env';
 
@@ -91,10 +92,97 @@ export async function googleCallback(
 
     // Redirigir al frontend con el token
     const redirectUrl = new URL('/auth/callback', env.frontendUrl);
-    redirectUrl.searchParams.set('token', result.token);
+    redirectUrl.searchParams.set('token', result.accessToken);
 
     res.redirect(redirectUrl.toString());
   } catch (error) {
     next(error);
+  }
+}
+
+/**
+ * POST /api/auth/register
+ * Registra un nuevo usuario con email y contraseña
+ */
+export async function register(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { email, password, username } = req.body;
+
+    // Validar input
+    const validation = validateRegisterInput({ email, password, username });
+    if (!validation.success) {
+      const errorMessage = validation.errors?.[0]?.message || 'Validation failed';
+      throw new AppError(400, errorMessage);
+    }
+
+    // Registrar usuario
+    const result = await registerWithEmail(
+      validation.data!.email,
+      validation.data!.password,
+      validation.data!.username
+    );
+
+    res.status(201).json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      next(error);
+    } else if (error instanceof Error && error.message.includes('ya está registrado')) {
+      next(new AppError(409, error.message));
+    } else if (error instanceof Error) {
+      next(new AppError(400, error.message));
+    } else {
+      next(new AppError(500, 'Registration failed'));
+    }
+  }
+}
+
+/**
+ * POST /api/auth/login
+ * Inicia sesión con email y contraseña
+ */
+export async function login(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { email, password } = req.body;
+
+    // Validar input
+    const validation = validateLoginInput({ email, password });
+    if (!validation.success) {
+      const errorMessage = validation.errors?.[0]?.message || 'Validation failed';
+      throw new AppError(400, errorMessage);
+    }
+
+    // Login usuario
+    const result = await loginWithEmail(
+      validation.data!.email,
+      validation.data!.password
+    );
+
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      next(error);
+    } else if (error instanceof Error && error.message.includes('registrada con Google')) {
+      next(new AppError(401, error.message));
+    } else if (error instanceof Error && error.message.includes('incorrectos')) {
+      next(new AppError(401, error.message));
+    } else if (error instanceof Error) {
+      next(new AppError(400, error.message));
+    } else {
+      next(new AppError(500, 'Login failed'));
+    }
   }
 }

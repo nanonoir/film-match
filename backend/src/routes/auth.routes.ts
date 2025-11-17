@@ -1,7 +1,19 @@
 import { Router } from 'express';
-import { googleAuth, getGoogleAuthUrl, googleCallback } from '../controllers/auth.controller';
+import { googleAuth, getGoogleAuthUrl, googleCallback, register, login } from '../controllers/auth.controller';
 
 const router = Router();
+
+/**
+ * POST /api/auth/register
+ * Registrar nuevo usuario con email y contraseña
+ */
+router.post('/register', register);
+
+/**
+ * POST /api/auth/login
+ * Login con email y contraseña
+ */
+router.post('/login', login);
 
 /**
  * GET /api/auth/google
