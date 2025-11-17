@@ -14,7 +14,9 @@ export const QUERY_CACHE_TIMES = {
 
   // Moderately changing data
   CURRENT_USER: 5 * 60 * 1000, // 5 minutes
+  USER_REVIEWS: 5 * 60 * 1000, // 5 minutes
   MOVIES: 5 * 60 * 1000, // 5 minutes
+  MOVIE_SEARCH: 5 * 60 * 1000, // 5 minutes
   SEARCH_RESULTS: 5 * 60 * 1000, // 5 minutes
 
   // Rarely changing data
@@ -104,6 +106,11 @@ export const queryKeys = {
     currentUser: () => [...queryKeys.auth.all, 'current-user'] as const,
     authUrl: () => [...queryKeys.auth.all, 'auth-url'] as const,
     chatStatus: () => [...queryKeys.auth.all, 'chat-status'] as const,
+  },
+
+  user: {
+    all: ['user'] as const,
+    reviews: (limit?: number) => [...queryKeys.user.all, 'reviews', limit || 10] as const,
   },
 
   movies: {

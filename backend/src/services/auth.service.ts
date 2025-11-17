@@ -12,6 +12,9 @@ const SALT_ROUNDS = 10;
  */
 export async function authenticateWithGoogle(googleData: GoogleUserData) {
   try {
+    // Extraer el prefijo del email (texto antes del @) para usar como apodo automático
+    const emailPrefix = googleData.email.split('@')[0];
+
     // Buscar usuario existente por googleId
     let user = await prisma.user.findUnique({
       where: { email: googleData.email }
@@ -24,6 +27,7 @@ export async function authenticateWithGoogle(googleData: GoogleUserData) {
         data: {
           googleId: googleData.googleId,
           username: googleData.name,
+          nickname: user.nickname || emailPrefix, // Mantener apodo si existe, si no usar prefijo de email
           profilePicture: googleData.picture
         }
       });
@@ -36,10 +40,13 @@ export async function authenticateWithGoogle(googleData: GoogleUserData) {
           googleId: googleData.googleId,
           email: googleData.email,
           username: googleData.name,
+          nickname: emailPrefix, // Auto-generar apodo del prefijo del email
           passwordHash: 'google-oauth', // No usamos contraseña con Google OAuth
           profilePicture: googleData.picture
         }
       });
+
+      console.log(`✅ Google Auth - New user created with auto-generated nickname: ${emailPrefix}`);
     }
 
     // Generar JWT
@@ -48,13 +55,25 @@ export async function authenticateWithGoogle(googleData: GoogleUserData) {
       email: user.email
     });
 
+    console.log('✅ Google Auth - accessToken generated:', {
+      length: accessToken.length,
+      startsCorrect: accessToken.startsWith('eyJ'),
+      parts: accessToken.split('.').length
+    });
+
     return {
       user: {
         id: user.id,
         email: user.email,
         username: user.username,
+        name: user.name || user.username, // Asegurar que name siempre existe
+        nickname: user.nickname,
         profilePicture: user.profilePicture,
-        googleId: user.googleId
+        bio: user.bio,
+        twitterUrl: user.twitterUrl,
+        instagramUrl: user.instagramUrl,
+        googleId: user.googleId,
+        createdAt: user.createdAt
       },
       accessToken
     };

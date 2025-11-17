@@ -9,14 +9,18 @@ export class UserController {
    */
   async getUserProfile(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      console.log('📋 getUserProfile - req.user:', req.user);
       const userId = parseInt(req.user!.userId as any);
+      console.log('📋 getUserProfile - userId:', userId);
       const user = await userService.getUserProfile(userId);
+      console.log('📋 getUserProfile - user found:', user.email);
 
       res.json({
         success: true,
         data: user
       });
     } catch (error) {
+      console.error('❌ getUserProfile error:', error);
       next(error);
     }
   }
@@ -35,6 +39,25 @@ export class UserController {
         success: true,
         data: user,
         message: 'Profile updated successfully'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/users/me/reviews
+   */
+  async getUserReviews(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = parseInt(req.user!.userId as any);
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+
+      const reviews = await userService.getUserReviews(userId, limit);
+
+      res.json({
+        success: true,
+        data: reviews
       });
     } catch (error) {
       next(error);

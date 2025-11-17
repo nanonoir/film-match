@@ -17,10 +17,15 @@ model User {
   id               Int      @id @default(autoincrement())
   email            String   @unique
   username         String?
+  name             String?  // Nombre completo
+  nickname         String?  // Apodo del usuario para el perfil
   passwordHash     String?  // null para OAuth users, hash para email/password
   googleId         String?  @unique  // Para Google OAuth
   authProvider     String   @default("local")  // "local", "google", "both"
-  profilePicture   String?  // Avatar del usuario
+  profilePicture   String?  // Avatar del usuario (URL o ID)
+  bio              String?  // Biografía/descripción del usuario
+  twitterUrl       String?  // URL de Twitter
+  instagramUrl     String?  // URL de Instagram
   isVerified       Boolean  @default(false)  // Para email verification (futuro)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -29,6 +34,7 @@ model User {
   ratings          UserRating[]
   collections      UserCollection[]
   chatMessages     ChatMessage[]
+  preferences      UserPreferences?
 
   @@index([email])
   @@index([googleId])
@@ -54,6 +60,7 @@ model Movie {
   ratings UserRating[]
   collections UserCollection[]
   embeddings MovieEmbedding[]
+  userPreferences UserPreferenceMovie[]
 
   @@index([tmdbId])
   @@index([createdAt])
@@ -175,4 +182,39 @@ model ChatMessage {
   @@index([createdAt])
   @@index([userId, conversationId]) // Para recuperar historial de conversación
   @@index([userId, createdAt]) // Para recuperar últimos mensajes del usuario
+}
+
+// ============================================
+// PREFERENCIAS DEL USUARIO
+// ============================================
+model UserPreferences {
+  id              Int     @id @default(autoincrement())
+  userId          Int     @unique
+  favoriteGenres  String  @db.Text  // JSON array de géneros favoritos
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relaciones
+  user            User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  favoriteMovies  UserPreferenceMovie[]
+
+  @@index([userId])
+}
+
+// ============================================
+// PELÍCULAS FAVORITAS DEL USUARIO (Relación N:M)
+// ============================================
+model UserPreferenceMovie {
+  id            Int     @id @default(autoincrement())
+  preferencesId Int
+  movieId       Int
+  createdAt     DateTime @default(now())
+
+  // Relaciones
+  preferences   UserPreferences @relation(fields: [preferencesId], references: [id], onDelete: Cascade)
+  movie         Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@unique([preferencesId, movieId]) // No duplicados
+  @@index([preferencesId])
+  @@index([movieId])
 }

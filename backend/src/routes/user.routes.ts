@@ -22,6 +22,12 @@ router.put(
   userController.updateUserProfile.bind(userController)
 );
 
+// Obtener reseñas del usuario
+router.get(
+  '/me/reviews',
+  userController.getUserReviews.bind(userController)
+);
+
 // Obtener estadísticas
 router.get(
   '/me/stats',

@@ -25,19 +25,12 @@ declare global {
 
 // In development, use the global instance if available
 // In production, create a new instance (which will be reused within the same container)
+// Note: Connection pool configuration should be set via DATABASE_URL parameters
+// Example: postgresql://user:pass@host/db?connection_limit=5&pool_timeout=30
 export const prisma =
   global.prisma ||
   new PrismaClient({
-    log: ['error', 'warn'],
-    // Connection pool configuration for resource-constrained environment
-    __internal: {
-      /**
-       * Connection pool settings
-       * Optimized for Render free tier with 5 max connections
-       * These are passed to the database driver
-       */
-      debug: false
-    }
+    log: ['error', 'warn']
   });
 
 // Attach to global in development to avoid multiple instances

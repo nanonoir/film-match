@@ -13,7 +13,12 @@ export class UserService {
         id: true,
         email: true,
         username: true,
+        name: true,
+        nickname: true,
         profilePicture: true,
+        bio: true,
+        twitterUrl: true,
+        instagramUrl: true,
         createdAt: true,
         updatedAt: true
       }
@@ -41,20 +46,86 @@ export class UserService {
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
-        username: dto.username || user.username,
-        profilePicture: dto.profilePicture || user.profilePicture
+        username: dto.username !== undefined ? dto.username : user.username,
+        nickname: dto.nickname !== undefined ? dto.nickname : user.nickname,
+        bio: dto.bio !== undefined ? dto.bio : user.bio,
+        profilePicture: dto.profilePicture !== undefined ? dto.profilePicture : user.profilePicture,
+        twitterUrl: dto.twitterUrl !== undefined ? dto.twitterUrl : user.twitterUrl,
+        instagramUrl: dto.instagramUrl !== undefined ? dto.instagramUrl : user.instagramUrl,
       },
       select: {
         id: true,
         email: true,
         username: true,
+        name: true,
+        nickname: true,
         profilePicture: true,
+        bio: true,
+        twitterUrl: true,
+        instagramUrl: true,
         createdAt: true,
         updatedAt: true
       }
     });
 
     return updatedUser;
+  }
+
+  /**
+   * Obtener reseñas/ratings del usuario
+   */
+  async getUserReviews(userId: number, limit: number = 10) {
+    const reviews = await prisma.userRating.findMany({
+      where: { userId },
+      include: {
+        movie: {
+          select: {
+            id: true,
+            tmdbId: true,
+            title: true,
+            overview: true,
+            releaseDate: true,
+            posterPath: true,
+            voteAverage: true,
+            categories: {
+              include: {
+                category: {
+                  select: {
+                    id: true,
+                    name: true,
+                    slug: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit
+    });
+
+    return reviews.map(review => ({
+      id: review.id,
+      rating: review.rating,
+      review: review.review,
+      createdAt: review.createdAt,
+      updatedAt: review.updatedAt,
+      movie: {
+        id: review.movie.id,
+        tmdbId: review.movie.tmdbId,
+        title: review.movie.title,
+        overview: review.movie.overview,
+        releaseDate: review.movie.releaseDate,
+        posterPath: review.movie.posterPath,
+        voteAverage: review.movie.voteAverage,
+        categories: review.movie.categories.map(mc => ({
+          id: mc.category.id,
+          name: mc.category.name,
+          slug: mc.category.slug
+        }))
+      }
+    }));
   }
 
   /**

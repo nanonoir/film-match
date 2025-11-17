@@ -6,8 +6,12 @@ export interface UserDTO {
   email: string;
   username?: string | null;
   name?: string | null;
+  nickname?: string | null;
   picture?: string | null;
   profilePicture?: string | null;
+  bio?: string | null;
+  twitterUrl?: string | null;
+  instagramUrl?: string | null;
   provider?: string;
   createdAt: string;
   updatedAt: string;

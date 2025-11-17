@@ -4,6 +4,7 @@
  * Main orchestration for Fase 3B.2
  */
 
+import { prisma } from '../lib/prisma';
 import { semanticSearchService } from './semantic-search.service';
 import { metadataSearchEngine } from './metadata-search-engine';
 import { userMetadataExtractor } from './user-metadata-extractor';
@@ -71,7 +72,19 @@ export class HybridRecommendationEngine {
       // Step 2: Handle cold start
       if (userMetadataExtractor.isUserColdStart(userProfile)) {
         console.log('❄️  Cold start detected: returning popular movies');
-        return await semanticSearchService.getPopularMoviesSuggestions(topK);
+        const popularMovies = await semanticSearchService.getPopularMoviesSuggestions(topK);
+        // Convert MovieResult to RecommendationResult for cold start
+        return popularMovies.map(movie => ({
+          ...movie,
+          recommendationScore: 0.5, // Neutral score for cold start
+          scoreBreakdown: {
+            vector: 0,
+            genre: 0,
+            popularity: 0.5
+          },
+          matchedGenres: [],
+          matchReason: 'Popular movie for new users'
+        }));
       }
 
       // Step 3: Get rated movie IDs for exclusion
@@ -83,11 +96,16 @@ export class HybridRecommendationEngine {
       // Step 4: Perform vector search
       console.log('📍 Step 2: Performing vector search...');
       const userVector = await this.generateUserVector(userProfile);
-      const vectorResults = await getPineconeService().search(
+      const pineconeResults = await getPineconeService().search(
         userVector,
         topK * 2 // Get more candidates for filtering
       );
-      console.log(`   Found ${vectorResults.length} vector matches`);
+      console.log(`   Found ${pineconeResults.length} vector matches`);
+
+      // Convert Pinecone SearchResult to MovieResult with similarity scores
+      const vectorResults = await this.convertSearchResultsToMovieResults(
+        pineconeResults
+      );
 
       // Step 5: Perform genre search
       console.log('📍 Step 3: Performing genre search...');
@@ -152,6 +170,59 @@ export class HybridRecommendationEngine {
     const userVector = metadataSearchEngine.averageEmbeddings(embeddings);
     console.log('   User vector created (averaged from top movies)');
     return userVector;
+  }
+
+  /**
+   * Convert Pinecone SearchResult to MovieResult by enriching with database data
+   * Adds full movie information and preserves similarity scores
+   *
+   * @param searchResults - Results from Pinecone search
+   * @returns Array of MovieResult with similarity scores from Pinecone
+   */
+  private async convertSearchResultsToMovieResults(
+    searchResults: any[]
+  ): Promise<MovieResult[]> {
+    if (searchResults.length === 0) {
+      return [];
+    }
+
+    // Extract movie IDs from search results
+    const movieIds = searchResults.map(r => parseInt(r.movieId));
+
+    // Fetch full movie data from database
+    const movies = await prisma.movie.findMany({
+      where: { id: { in: movieIds } },
+      include: {
+        categories: {
+          include: { category: true }
+        }
+      }
+    });
+
+    // Create a map for quick lookup with similarity scores
+    const movieMap = new Map(movies.map(m => [m.id, m]));
+    const resultMap = new Map(searchResults.map(r => [parseInt(r.movieId), r]));
+
+    // Convert to MovieResult, preserving similarity scores
+    const results: MovieResult[] = [];
+    for (const movie of movies) {
+      const searchResult = resultMap.get(movie.id);
+      if (searchResult) {
+        results.push({
+          id: movie.id,
+          tmdbId: movie.tmdbId,
+          title: movie.title,
+          year: movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : null,
+          overview: movie.overview,
+          genres: movie.categories.map(mc => mc.category.name),
+          posterPath: movie.posterPath,
+          voteAverage: movie.voteAverage ? parseFloat(movie.voteAverage.toString()) : null,
+          similarityScore: searchResult.score // Preserve Pinecone similarity score
+        });
+      }
+    }
+
+    return results;
   }
 
   /**

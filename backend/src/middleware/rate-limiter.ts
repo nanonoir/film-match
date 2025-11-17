@@ -4,7 +4,7 @@
  * Uses express-rate-limit with custom key generation and handling
  */
 
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { RateLimitConfig } from '../config/rate-limits';
 
 /**
@@ -18,7 +18,11 @@ export function createRateLimiter(config: RateLimitConfig) {
     standardHeaders: config.standardHeaders,
     skipSuccessfulRequests: config.skipSuccessfulRequests,
     skipFailedRequests: config.skipFailedRequests,
-    keyGenerator: config.keyGenerator || ((req) => req.ip || 'unknown'),
+    keyGenerator: config.keyGenerator || ((req, res) => {
+      // Use ipKeyGenerator to extract IP, wrapping it with proper types
+      const ip = req.ip || req.socket.remoteAddress || 'unknown';
+      return ipKeyGenerator(ip);
+    }),
     handler: (req, res) => {
       console.warn(`⚠️  Rate limit exceeded: ${config.message}`);
       res.status(429).json({
@@ -80,8 +84,9 @@ export const rateLimiters = {
         console.log(`🔒 Rate limiting chat for user ${userId}`);
         return `chat_user_${userId}`;
       }
-      console.log(`🔒 Rate limiting chat for IP ${req.ip}`);
-      return `chat_ip_${req.ip}`;
+      const ip = req.ip || req.socket.remoteAddress || 'unknown';
+      console.log(`🔒 Rate limiting chat for IP ${ip}`);
+      return `chat_ip_${ipKeyGenerator(ip)}`;
     }
   }),
 
@@ -103,8 +108,9 @@ export const rateLimiters = {
         console.log(`🔒 Rate limiting recommendations for user ${userId}`);
         return `recommendations_user_${userId}`;
       }
-      console.log(`🔒 Rate limiting recommendations for IP ${req.ip}`);
-      return `recommendations_ip_${req.ip}`;
+      const ip = req.ip || req.socket.remoteAddress || 'unknown';
+      console.log(`🔒 Rate limiting recommendations for IP ${ip}`);
+      return `recommendations_ip_${ipKeyGenerator(ip)}`;
     }
   }),
 

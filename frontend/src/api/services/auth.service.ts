@@ -101,6 +101,39 @@ class AuthService {
   }
 
   /**
+   * Actualizar perfil del usuario
+   *
+   * @param profile - Datos del perfil a actualizar
+   * @returns Usuario actualizado
+   */
+  async updateUserProfile(profile: {
+    nickname?: string;
+    bio?: string;
+    profilePicture?: string | null;
+    twitterUrl?: string | null;
+    instagramUrl?: string | null;
+  }): Promise<UserDTO> {
+    const response = await apiClient.put<ApiResponse<UserDTO>>(
+      '/users/me',
+      profile
+    );
+    return response.data.data;
+  }
+
+  /**
+   * Obtener reseñas del usuario
+   *
+   * @param limit - Cantidad máxima de reseñas a traer (default: 10)
+   * @returns Array de reseñas con datos de películas
+   */
+  async getUserReviews(limit: number = 10): Promise<any[]> {
+    const response = await apiClient.get<ApiResponse<any[]>>(
+      `/users/me/reviews?limit=${limit}`
+    );
+    return response.data.data;
+  }
+
+  /**
    * Logout (limpiar tokens en cliente)
    * El backend no tiene endpoint logout específico
    */

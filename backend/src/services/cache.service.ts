@@ -194,7 +194,7 @@ class CacheService {
 
   getRecommendations(userId: number): any[] | undefined {
     const key = `recommendations_${userId}`;
-    const value = this.recommendationsCache.get(key);
+    const value = this.recommendationsCache.get<any[]>(key);
     if (value) {
       this.stats.hits++;
       console.log(`✅ Cache hit: ${key}`);
@@ -223,7 +223,7 @@ class CacheService {
 
   getPopularMovies(topK: number): any[] | undefined {
     const key = `popular_movies_${topK}`;
-    const value = this.popularMoviesCache.get(key);
+    const value = this.popularMoviesCache.get<any[]>(key);
     if (value) {
       this.stats.hits++;
       console.log(`✅ Cache hit: ${key}`);

@@ -11,6 +11,7 @@ import userRoutes from './routes/user.routes';
 import categoryRoutes from './routes/category.routes';
 import tmdbRoutes from './routes/tmdb.routes';
 import ragRoutes from './routes/rag.routes';
+import preferencesRoutes from './routes/preferences.routes';
 import { errorHandler, notFound } from './middleware/error.middleware';
 import { rateLimiters } from './middleware/rate-limiter';
 
@@ -84,6 +85,7 @@ app.use('/api/movies', rateLimiters.api, movieRoutes);
 app.use('/api/ratings', rateLimiters.api, ratingRoutes);
 app.use('/api/collections', rateLimiters.api, collectionRoutes);
 app.use('/api/users', rateLimiters.api, userRoutes);
+app.use('/api/preferences', rateLimiters.api, preferencesRoutes);
 app.use('/api/categories', rateLimiters.api, categoryRoutes);
 app.use('/api/tmdb', rateLimiters.api, tmdbRoutes);
 

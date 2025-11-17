@@ -40,6 +40,14 @@ export class TokenManager {
    * @param refreshToken - JWT token de refresco (opcional)
    */
   static setTokens(accessToken: string, refreshToken?: string): void {
+    console.log('💾 TokenManager.setTokens - received token:', {
+      length: accessToken.length,
+      startsCorrect: accessToken.startsWith('eyJ'),
+      parts: accessToken.split('.').length,
+      preview: accessToken.substring(0, 50) + '...',
+      fullToken: accessToken // Log full token for debugging
+    });
+
     localStorage.setItem(this.ACCESS_TOKEN_KEY, accessToken);
 
     if (refreshToken) {
@@ -58,6 +66,7 @@ export class TokenManager {
       console.log('✅ Tokens guardados:', userData.email);
     } catch (error) {
       console.error('❌ Error decodificando token:', error);
+      console.error('❌ Token that failed to decode:', accessToken);
       // Aún así guardar el token si la decodificación falla
     }
   }

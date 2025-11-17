@@ -26,10 +26,10 @@ export const useEmailAuth = () => {
 
       if (response.user && response.accessToken) {
         // Guardar token y datos del usuario
-        TokenManager.setTokens({
-          accessToken: response.accessToken,
-          refreshToken: response.refreshToken || response.accessToken, // Usamos refreshToken si existe, si no el mismo accessToken
-        });
+        TokenManager.setTokens(
+          response.accessToken,
+          response.refreshToken || undefined
+        );
 
         return {
           success: true,
@@ -67,10 +67,10 @@ export const useEmailAuth = () => {
 
       if (response.user && response.accessToken) {
         // Guardar token y datos del usuario
-        TokenManager.setTokens({
-          accessToken: response.accessToken,
-          refreshToken: response.refreshToken || response.accessToken, // Usamos refreshToken si existe, si no el mismo accessToken
-        });
+        TokenManager.setTokens(
+          response.accessToken,
+          response.refreshToken || undefined
+        );
 
         return {
           success: true,

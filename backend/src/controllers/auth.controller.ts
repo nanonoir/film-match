@@ -42,11 +42,23 @@ export async function googleAuth(
       throw new AppError(400, 'Token is required');
     }
 
+    console.log('🔐 googleAuth controller - Received Google token');
+
     // Verificar token de Google
     const googleData = await verifyGoogleToken(token);
 
+    console.log('🔐 googleAuth controller - Google token verified, authenticating user');
+
     // Autenticar/registrar usuario
     const result = await authenticateWithGoogle(googleData);
+
+    console.log('🔐 googleAuth controller - Response to be sent:', {
+      hasAccessToken: !!result.accessToken,
+      accessTokenLength: result.accessToken?.length,
+      accessTokenParts: result.accessToken?.split('.').length,
+      hasUser: !!result.user,
+      userEmail: result.user?.email
+    });
 
     res.json({
       success: true,

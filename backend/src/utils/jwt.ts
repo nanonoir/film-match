@@ -9,9 +9,20 @@ import { JWTPayload } from '../types/auth.types';
  */
 export function generateToken(payload: Omit<JWTPayload, 'iat' | 'exp'>): string {
   // @ts-ignore - jsonwebtoken typing issue
-  return jwt.sign(payload, env.jwtSecret, {
+  const token: string = jwt.sign(payload, env.jwtSecret, {
     expiresIn: env.jwtExpiresIn
   });
+
+  console.log('📝 generateToken - Generated JWT:', {
+    payload: payload,
+    tokenLength: token.length,
+    parts: token.split('.').length,
+    startsCorrect: token.startsWith('eyJ'),
+    preview: token.substring(0, 50) + '...',
+    expiresIn: env.jwtExpiresIn
+  });
+
+  return token;
 }
 
 /**

@@ -4,7 +4,9 @@
       "Bash(git add:*)",
       "Bash(timeout 30 npx prisma db push:*)",
       "Bash(npm install:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(npx prisma db push:*)"
     ],
     "deny": [],
     "ask": []
