@@ -16,6 +16,7 @@ interface MovieCardProps {
   onMatch: () => void;
   onSkip: () => void;
   onShowDetails: () => void;
+  isLoading?: boolean;
 }
 
 /**
@@ -42,6 +43,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
   onMatch,
   onSkip,
   onShowDetails,
+  isLoading = false,
 }) => {
   // Drag animation values
   const x = useMotionValue(0);
@@ -150,21 +152,32 @@ const MovieCard: React.FC<MovieCardProps> = ({
           <div className="flex gap-4 pt-4">
             <button
               onClick={handleSkip}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 font-semibold transition-all"
+              disabled={isLoading}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <X className="w-5 h-5" />
-              <span className="hidden sm:inline">Rechazar</span>
+              {isLoading ? (
+                <div className="w-5 h-5 animate-spin rounded-full border-2 border-red-400/30 border-t-red-400"></div>
+              ) : (
+                <X className="w-5 h-5" />
+              )}
+              <span className="hidden sm:inline">{isLoading ? 'Enviando...' : 'Rechazar'}</span>
             </button>
             <button
               onClick={handleMatch}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-green-500/20 hover:bg-green-500/30 text-green-400 font-semibold transition-all"
+              disabled={isLoading}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-green-500/20 hover:bg-green-500/30 text-green-400 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Heart className="w-5 h-5" />
-              <span className="hidden sm:inline">Match</span>
+              {isLoading ? (
+                <div className="w-5 h-5 animate-spin rounded-full border-2 border-green-400/30 border-t-green-400"></div>
+              ) : (
+                <Heart className="w-5 h-5" />
+              )}
+              <span className="hidden sm:inline">{isLoading ? 'Enviando...' : 'Match'}</span>
             </button>
             <button
               onClick={onShowDetails}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 font-semibold transition-all"
+              disabled={isLoading}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ExternalLink className="w-5 h-5" />
               <span className="hidden sm:inline">Detalles</span>

@@ -25,7 +25,7 @@ interface RatingsProviderProps {
  */
 export const RatingsProvider: React.FC<RatingsProviderProps> = ({ children }) => {
   // Get server state from React Query
-  // Disable by default - will be enabled only in appropriate routes
+  // Enabled: Load user ratings on mount (Home page needs them)
   const {
     ratingsData,
     isLoadingRatings,
@@ -33,7 +33,7 @@ export const RatingsProvider: React.FC<RatingsProviderProps> = ({ children }) =>
     ratingStats,
     createOrUpdateRating,
     deleteRating,
-  } = useRatings(false);
+  } = useRatings(true);
 
   // Convert RatingDTO to UserRating for backward compatibility
   const ratings: UserRating[] = useMemo(() => {

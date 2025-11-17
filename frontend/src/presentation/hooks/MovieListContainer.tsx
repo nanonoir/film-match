@@ -9,10 +9,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useMovies } from '@/hooks/api';
+import { useMovies, useRatings } from '@/hooks/api';
 import { useMovieMatches, useFilterMovies } from '@/hooks';
 import { useUI } from '../../context/ui';
 import type { Movie } from '@core';
+import type { CreateRatingDTO } from '@/api/types';
 import MovieCardComponent from './MovieCard';
 import MatchModalComponent from './MatchModal';
 import FiltersSidebarComponent from './FiltersSidebar';
@@ -33,8 +34,14 @@ const MovieListContainer: React.FC = () => {
   // Get movies from React Query hook
   const { moviesData, isLoadingMovies, moviesError } = useMovies(undefined, true);
 
+  // Get ratings from React Query hook
+  const { ratingsData, createOrUpdateRating, isCreatingRating } = useRatings(true);
+
   // Convert DTOs to Movie type for local use
   const allMovies: Movie[] = (moviesData?.data || []) as unknown as Movie[];
+
+  // Get rated movie IDs for tracking
+  const ratedMovieIds = new Set((ratingsData || []).map(r => (r as any).movieId));
 
   // State management using custom hooks
   const { matches, addMatch } = useMovieMatches();
@@ -48,6 +55,7 @@ const MovieListContainer: React.FC = () => {
   const [currentMovieIndex, setCurrentMovieIndex] = useState(0);
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [matchedMovie, setMatchedMovie] = useState<Movie | null>(null);
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
 
   /**
    * Get current movie to display
@@ -55,25 +63,61 @@ const MovieListContainer: React.FC = () => {
   const currentMovie = filteredMovies[currentMovieIndex] || null;
 
   /**
-   * Handle match action
+   * Handle match action - Like the movie and send rating to backend
    */
   const handleMatch = async () => {
     if (currentMovie) {
       try {
+        setIsSubmittingRating(true);
+
+        // Create rating with 5 stars (like)
+        const ratingData: CreateRatingDTO = {
+          movieId: currentMovie.id,
+          rating: 5,
+          review: null
+        };
+
+        // Send rating to backend
+        await createOrUpdateRating(ratingData);
+        console.log(`✅ Rated movie ${currentMovie.id} with 5 stars`);
+
+        // Add to matches
         await addMatch(currentMovie);
         setMatchedMovie(currentMovie);
         setShowMatchModal(true);
       } catch (err) {
         console.error('Error adding match:', err);
+      } finally {
+        setIsSubmittingRating(false);
       }
     }
   };
 
   /**
-   * Handle skip action
+   * Handle skip action - Dislike the movie and send rating to backend
    */
-  const handleSkip = () => {
-    advanceToNextMovie();
+  const handleSkip = async () => {
+    if (currentMovie) {
+      try {
+        setIsSubmittingRating(true);
+
+        // Create rating with 1 star (dislike)
+        const ratingData: CreateRatingDTO = {
+          movieId: currentMovie.id,
+          rating: 1,
+          review: null
+        };
+
+        // Send rating to backend
+        await createOrUpdateRating(ratingData);
+        console.log(`⊘ Rated movie ${currentMovie.id} with 1 star`);
+      } catch (err) {
+        console.error('Error submitting skip rating:', err);
+      } finally {
+        setIsSubmittingRating(false);
+        advanceToNextMovie();
+      }
+    }
   };
 
   /**
@@ -216,6 +260,7 @@ const MovieListContainer: React.FC = () => {
                     onMatch={handleMatch}
                     onSkip={handleSkip}
                     onShowDetails={handleViewDetails}
+                    isLoading={isSubmittingRating}
                   />
                 )}
               </>
