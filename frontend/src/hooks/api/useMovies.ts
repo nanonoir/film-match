@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { movieService } from '@/api/services';
 import { queryKeys, QUERY_CACHE_TIMES } from '@/lib/cache/query-cache';
 import type { MovieDTO, MovieQueryParams } from '@/api/types';
+import { MovieMapper } from '@/api/mappers';
+import type { Movie } from '@/core/domain/entities';
 
 /**
  * useMovies hook
@@ -96,10 +98,13 @@ export const useMovies = (initialParams?: MovieQueryParams, enabled: boolean = t
     });
   };
 
+  // Map DTOs to Movie entities
+  const mappedMovies: Movie[] = (moviesData?.data || []).map(dto => MovieMapper.toDomain(dto));
+
   return {
     // List data
     moviesData,
-    movies: moviesData?.data || [],
+    movies: mappedMovies,
     pagination: moviesData?.pagination,
     isLoadingMovies,
     isMoviesError,

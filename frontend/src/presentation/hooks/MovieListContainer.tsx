@@ -31,14 +31,11 @@ import FiltersSidebarComponent from './FiltersSidebar';
 const MovieListContainer: React.FC = () => {
   const navigate = useNavigate();
 
-  // Get movies from React Query hook
-  const { moviesData, isLoadingMovies, moviesError } = useMovies(undefined, true);
+  // Get movies from React Query hook (includes mapping from DTO to Movie entity)
+  const { movies: allMovies, isLoadingMovies, moviesError } = useMovies(undefined, true);
 
   // Get ratings hook for submitting ratings (don't load all ratings to avoid rate limiting)
   const { createOrUpdateRating, isCreatingRating } = useRatings(false);
-
-  // Convert DTOs to Movie type for local use
-  const allMovies: Movie[] = (moviesData?.data || []) as unknown as Movie[];
 
   // State management using custom hooks
   const { matches, addMatch } = useMovieMatches();

@@ -52,6 +52,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
 
   // Exit animation state
   const [exitX, setExitX] = useState(0);
+  const [imageError, setImageError] = useState(false);
 
   /**
    * Reset exit animation when movie changes
@@ -59,6 +60,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
    */
   useEffect(() => {
     setExitX(0);
+    setImageError(false);
   }, [movie.id]);
 
   /**
@@ -101,13 +103,26 @@ const MovieCard: React.FC<MovieCardProps> = ({
       animate={exitX !== 0 ? { x: exitX } : {}}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
     >
-      <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl">
-        {/* Movie Poster */}
-        <img
-          src={movie.poster}
-          alt={movie.title}
-          className="w-full h-full object-cover"
-        />
+      <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl bg-gray-800">
+        {/* Movie Poster Background */}
+        {!imageError && (
+          <img
+            src={movie.poster}
+            alt={movie.title}
+            className="w-full h-full object-cover"
+            onError={() => setImageError(true)}
+          />
+        )}
+
+        {/* Fallback when image fails to load */}
+        {imageError && (
+          <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-4xl mb-2">🎬</div>
+              <p className="text-gray-400">Sin imagen disponible</p>
+            </div>
+          </div>
+        )}
 
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
@@ -121,8 +136,6 @@ const MovieCard: React.FC<MovieCardProps> = ({
                 <span>{movie.year || 'N/A'}</span>
                 <span>•</span>
                 <span>{(movie.genres as any)?.join(', ') || 'Sin género'}</span>
-                <span>•</span>
-                <span>{(movie as any).duration || 'N/A'}</span>
               </div>
             </div>
             <div className="flex items-center space-x-2 bg-black/40 px-3 py-1 rounded-full">
@@ -131,21 +144,6 @@ const MovieCard: React.FC<MovieCardProps> = ({
             </div>
           </div>
 
-          {/* Director and Cast */}
-          <div className="pt-3 border-t border-white/10 space-y-2">
-            {(movie as any).director && (
-              <div>
-                <p className="text-xs text-gray-400 uppercase">Director</p>
-                <p className="text-sm">{(movie as any).director}</p>
-              </div>
-            )}
-            {(movie as any).cast && Array.isArray((movie as any).cast) && (
-              <div>
-                <p className="text-xs text-gray-400 uppercase">Reparto</p>
-                <p className="text-sm">{(movie as any).cast.slice(0, 3).join(', ')}</p>
-              </div>
-            )}
-          </div>
 
           {/* Description */}
           {(movie as any).overview && (

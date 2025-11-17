@@ -20,7 +20,8 @@ export class Movie {
     public readonly director: string,
     public readonly cast: string[],
     public readonly poster: string,
-  ) {}
+  ) { }
+
 
   /**
    * Factory method to create a Movie entity with validation
@@ -99,13 +100,8 @@ export class Movie {
       throw new Error('Movie rating must be between 0 and 10');
     }
 
-    if (!data.director || typeof data.director !== 'string') {
-      throw new Error('Movie director is required');
-    }
-
-    if (!Array.isArray(data.cast) || data.cast.length === 0) {
-      throw new Error('Movie must have at least one cast member');
-    }
+    // director, cast, and duration are optional (may not be provided by backend)
+    // No validation needed for these fields
   }
 
   /**
