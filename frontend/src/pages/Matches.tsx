@@ -6,9 +6,9 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Search, Heart } from 'lucide-react';
+import { ArrowLeft, Search, Heart, Loader2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import moviesData from '../data/movies.json';
+import { useMatches } from '@/hooks/api/useMatches';
 import type { Movie } from '@core';
 
 type SortOption = 'fecha' | 'rating' | 'a-z';
@@ -16,18 +16,30 @@ type SortOption = 'fecha' | 'rating' | 'a-z';
 const Matches: React.FC = () => {
   const navigate = useNavigate();
 
-  // Mock matched movies - in a real app, this would come from context/API
-  const matchedMovieIds = [5, 3, 1, 7, 10, 12, 15, 18]; // Example IDs
-
   // State
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('fecha');
   const [showOnlyUnwatched, setShowOnlyUnwatched] = useState(false);
 
-  // Get matched movies from data
+  // Get matched movies from API
+  const { getMatchlist } = useMatches();
+  const { data: matchlistData, isLoading: isLoadingMatches } = getMatchlist({ status: 'like' });
+
+  // Convert API response to Movie format
   const matchedMovies: Movie[] = useMemo(() => {
-    return moviesData.filter(movie => matchedMovieIds.includes(movie.id)) as Movie[];
-  }, []);
+    if (!matchlistData?.matches) return [];
+    return matchlistData.matches.map((match: any) => ({
+      id: match.movie.id,
+      title: match.movie.title,
+      overview: match.movie.overview || '',
+      poster: match.movie.posterPath || '',
+      rating: match.movie.voteAverage ? Number(match.movie.voteAverage) / 2 : 0, // Convert from 0-10 to 0-5
+      year: match.movie.releaseDate ? new Date(match.movie.releaseDate).getFullYear() : 0,
+      genres: match.movie.genres || [],
+      director: '', // Not available in API response
+      cast: [], // Not available in API response
+    }));
+  }, [matchlistData]);
 
   // Filter by search query
   const filteredMovies = useMemo(() => {
@@ -152,7 +164,12 @@ const Matches: React.FC = () => {
           </div>
 
           {/* Movies Grid or Empty State */}
-          {sortedMovies.length === 0 ? (
+          {isLoadingMatches ? (
+            <div className="flex flex-col items-center justify-center py-16 xs:py-20 sm:py-24">
+              <Loader2 className="w-12 h-12 text-primary-pink animate-spin mb-4" />
+              <p className="text-gray-400 text-sm">Cargando tus matches...</p>
+            </div>
+          ) : sortedMovies.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 xs:py-20 sm:py-24">
               <div className="w-20 xs:w-24 h-20 xs:h-24 rounded-full bg-gradient-to-br from-primary-pink/20 to-primary-purple/20 flex items-center justify-center mb-6 xs:mb-8">
                 <Heart className="w-10 xs:w-12 h-10 xs:h-12 text-primary-pink opacity-50" />

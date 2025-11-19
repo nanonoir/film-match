@@ -11,7 +11,13 @@
       "Bash(del \"c:\\Users\\gonza\\OneDrive\\Escritorio\\film-match\\backend\\src\\index.ts\")",
       "Bash(npx tsc)",
       "Bash(npx prisma generate:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npx prisma migrate diff:*)",
+      "Bash(prisma/migrations/20250118000000_init/migration.sql)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(test:*)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []

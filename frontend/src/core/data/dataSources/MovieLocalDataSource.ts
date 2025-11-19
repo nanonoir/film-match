@@ -1,92 +1,60 @@
 /**
  * MovieLocalDataSource
- * Accesses movie data from local JSON file
+ *
+ * DEPRECATED: This data source used mock data from movies.json
+ * TODO: Replace with API-based data source or remove if no longer needed
+ * For now, returns empty results to prevent build errors
  */
 
-import moviesData from '../../../data/movies.json';
 import type { MovieDTO } from '../types';
 
 /**
  * Data source for accessing movie data from local file
+ * DEPRECATED - Use API-based services instead
  */
 export class MovieLocalDataSource {
   private moviesCache: MovieDTO[] | null = null;
 
   /**
    * Loads all movies from the data source
+   * DEPRECATED - Returns empty array
    *
-   * @returns Promise resolving to array of MovieDTOs
-   * @throws Error if loading fails
+   * @returns Promise resolving to empty array
    */
   async getAll(): Promise<MovieDTO[]> {
-    // Return cached data if available
-    if (this.moviesCache) {
-      return [...this.moviesCache];
-    }
-
-    try {
-      // Cast the imported data to MovieDTO array
-      const movies = moviesData as MovieDTO[];
-
-      // Validate that data is an array
-      if (!Array.isArray(movies)) {
-        throw new Error('Invalid movies data format');
-      }
-
-      // Cache the data
-      this.moviesCache = movies;
-
-      return [...movies];
-    } catch (error) {
-      throw new Error(`Failed to load movies: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+    console.warn('MovieLocalDataSource.getAll() is deprecated. Use API-based services instead.');
+    return [];
   }
 
   /**
    * Gets a single movie by ID
+   * DEPRECATED - Returns null
    *
    * @param id - Movie ID
-   * @returns Promise resolving to MovieDTO or null if not found
+   * @returns Promise resolving to null
    */
   async getById(id: number): Promise<MovieDTO | null> {
-    try {
-      const movies = await this.getAll();
-      const movie = movies.find((m) => m.id === id);
-      return movie || null;
-    } catch (error) {
-      throw new Error(`Failed to get movie by ID: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+    console.warn('MovieLocalDataSource.getById() is deprecated. Use API-based services instead.');
+    return null;
   }
 
   /**
-   * Searches movies by query in title, director, cast, and overview
+   * Searches movies by query
+   * DEPRECATED - Returns empty array
    *
    * @param query - Search query
-   * @returns Promise resolving to matching MovieDTOs
+   * @returns Promise resolving to empty array
    */
   async search(query: string): Promise<MovieDTO[]> {
-    try {
-      const movies = await this.getAll();
-      const lowerQuery = query.toLowerCase();
-
-      return movies.filter((movie) => {
-        return (
-          movie.title.toLowerCase().includes(lowerQuery) ||
-          movie.director.toLowerCase().includes(lowerQuery) ||
-          movie.cast.some((actor) => actor.toLowerCase().includes(lowerQuery)) ||
-          movie.overview.toLowerCase().includes(lowerQuery)
-        );
-      });
-    } catch (error) {
-      throw new Error(`Failed to search movies: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+    console.warn('MovieLocalDataSource.search() is deprecated. Use API-based services instead.');
+    return [];
   }
 
   /**
    * Clears the cache
-   * Useful for testing or refreshing data
+   * DEPRECATED - No-op
    */
   clearCache(): void {
-    this.moviesCache = null;
+    // No-op
   }
 }

@@ -5,13 +5,11 @@
  * Contains all 5 filter controls in a clean modal layout
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronDown } from 'lucide-react';
 import { Backdrop } from '../ui/Backdrop/Backdrop';
 import { useFiltersContext } from '../../../context/filters/useFiltersContext';
-import moviesData from '../../../data/movies.json';
-import type { Movie } from '@core';
 
 interface SearchFiltersModalProps {
   isOpen: boolean;
@@ -35,6 +33,11 @@ const GENRE_TRANSLATIONS: Record<string, string> = {
   'Western': 'Occidental',
 };
 
+// Available genres (static list based on common movie genres)
+const AVAILABLE_GENRES = Object.keys(GENRE_TRANSLATIONS).sort((a, b) =>
+  (GENRE_TRANSLATIONS[a] || a).localeCompare(GENRE_TRANSLATIONS[b] || b)
+);
+
 export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
   isOpen,
   onClose,
@@ -42,17 +45,8 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
   const { criteria, decade, trend, sortBy, updateGenres, updateMinRating, setDecade, setTrend, setSortBy } =
     useFiltersContext();
 
-  // Get unique genres from movies with Spanish translations
-  const availableGenres = useMemo(() => {
-    const genresMap = new Map<string, string>(); // Spanish name -> English name
-    (moviesData as Movie[]).forEach((movie) => {
-      movie.genres.forEach((genre) => {
-        const spanishGenre = GENRE_TRANSLATIONS[genre] || genre;
-        genresMap.set(spanishGenre, genre);
-      });
-    });
-    return Array.from(genresMap.keys()).sort();
-  }, []);
+  // Get available genres with Spanish translations
+  const availableGenres = AVAILABLE_GENRES.map(genre => GENRE_TRANSLATIONS[genre] || genre);
 
   const handleGenreChange = (spanishGenre: string) => {
     // Convert Spanish genre back to English for storage
