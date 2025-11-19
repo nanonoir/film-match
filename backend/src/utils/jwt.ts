@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env';
-import { JWTPayload } from '../types/auth.types';
+import { JWTPayload, RefreshTokenPayload } from '../types/auth.types';
 
 /**
  * Genera un JWT para un usuario
@@ -57,4 +57,49 @@ export function extractTokenFromHeader(authHeader?: string): string | null {
   }
 
   return authHeader.substring(7); // Remove "Bearer " prefix
+}
+
+/**
+ * Genera un Refresh Token
+ * @param payload - Datos a incluir en el refresh token
+ * @returns Token firmado (30 días de duración)
+ */
+export function generateRefreshToken(payload: Omit<RefreshTokenPayload, 'iat' | 'exp'>): string {
+  // @ts-ignore - jsonwebtoken typing issue
+  return jwt.sign(payload, env.jwtSecret, {
+    expiresIn: '30d'
+  });
+}
+
+/**
+ * Verifica y decodifica un Refresh Token
+ * @param token - Token a verificar
+ * @returns Payload decodificado si es válido
+ * @throws Error si el token es inválido o expiró
+ */
+export function verifyRefreshToken(token: string): RefreshTokenPayload {
+  try {
+    const decoded = jwt.verify(token, env.jwtSecret) as RefreshTokenPayload;
+    return decoded;
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      throw new Error('Refresh token expired');
+    }
+    if (error instanceof jwt.JsonWebTokenError) {
+      throw new Error('Invalid refresh token');
+    }
+    throw error;
+  }
+}
+
+/**
+ * Genera un Access Token con duración corta (15 minutos)
+ * @param payload - Datos del usuario
+ * @returns Access token
+ */
+export function generateAccessToken(payload: Omit<JWTPayload, 'iat' | 'exp'>): string {
+  // @ts-ignore - jsonwebtoken typing issue
+  return jwt.sign(payload, env.jwtSecret, {
+    expiresIn: '15m'
+  });
 }

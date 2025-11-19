@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyGoogleToken, getGoogleAuthURL, getGoogleTokens } from '../services/google-auth.service';
-import { authenticateWithGoogle, registerWithEmail, loginWithEmail } from '../services/auth.service';
+import { authenticateWithGoogle, registerWithEmail, loginWithEmail, refreshTokens, logout } from '../services/auth.service';
 import { validateRegisterInput, validateLoginInput } from '../validators/auth.validator';
 import { AppError } from '../middleware/error.middleware';
 import { env } from '../config/env';
+import { AuthRequest } from '../types/auth.types';
 
 /**
  * GET /api/auth/google
@@ -195,6 +196,89 @@ export async function login(
       next(new AppError(400, error.message));
     } else {
       next(new AppError(500, 'Login failed'));
+    }
+  }
+}
+
+/**
+ * POST /api/auth/refresh
+ * Renueva tokens usando refresh token
+ */
+export async function refresh(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      throw new AppError(400, 'Refresh token is required');
+    }
+
+    const result = await refreshTokens(refreshToken);
+
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      next(error);
+    } else if (error instanceof Error) {
+      // Manejar errores específicos de refresh token
+      if (error.message.includes('expired')) {
+        next(new AppError(401, 'Refresh token expired'));
+      } else if (error.message.includes('Invalid') || error.message.includes('revoked')) {
+        next(new AppError(401, error.message));
+      } else {
+        next(new AppError(400, error.message));
+      }
+    } else {
+      next(new AppError(500, 'Token refresh failed'));
+    }
+  }
+}
+
+/**
+ * POST /api/auth/logout
+ * Cierra sesión revocando refresh tokens
+ */
+export async function logoutUser(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const userIdStr = req.user?.userId;
+
+    if (!userIdStr) {
+      throw new AppError(401, 'Not authenticated');
+    }
+
+    const userId = parseInt(userIdStr);
+    const { refreshToken, allDevices } = req.body;
+
+    const result = await logout(
+      userId,
+      allDevices ? undefined : refreshToken
+    );
+
+    res.json({
+      success: true,
+      data: {
+        message: allDevices
+          ? `Sesión cerrada en ${result.revokedCount} dispositivo(s)`
+          : 'Sesión cerrada exitosamente'
+      }
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      next(error);
+    } else if (error instanceof Error) {
+      next(new AppError(400, error.message));
+    } else {
+      next(new AppError(500, 'Logout failed'));
     }
   }
 }

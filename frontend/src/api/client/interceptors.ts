@@ -76,7 +76,10 @@ export const setupInterceptors = (client: AxiosInstance): void => {
       };
 
       // Error 401: Token expirado o inválido
-      if (error.response?.status === 401 && !originalRequest._retry) {
+      // No intentar refresh si es el mismo endpoint de refresh (evita loop infinito)
+      const isRefreshRequest = originalRequest.url?.includes('/auth/refresh');
+
+      if (error.response?.status === 401 && !originalRequest._retry && !isRefreshRequest) {
         // Si ya estamos renovando, agregar este request a la queue
         if (isRefreshing) {
           return new Promise((resolve, reject) => {

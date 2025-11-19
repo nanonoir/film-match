@@ -242,6 +242,109 @@ export class GeminiChatService {
       apiKeyPresent: !!GEMINI_API_KEY && GEMINI_API_KEY !== 'your-gemini-api-key'
     };
   }
+
+  /**
+   * Fallback chat when Gemini is not available
+   * Uses recommendation engine to provide movie suggestions with template responses
+   *
+   * @param request - Chat request
+   * @returns Fallback response with recommendations
+   */
+  async fallbackChat(request: GeminiChatRequest): Promise<GeminiChatResponseData> {
+    const startTime = Date.now();
+
+    try {
+      console.log(`\n🤖 Fallback Chat for User ${request.userId}`);
+      console.log(`   Message: "${request.message.substring(0, 50)}..."`);
+
+      const conversationId = request.conversationId || geminiContextBuilder.generateConversationId();
+
+      // Build context with recommendations
+      const context = await geminiContextBuilder.buildChatContext(
+        request.userId,
+        request.message,
+        true,
+        request.topK || 5,
+        conversationId
+      );
+
+      // Analyze intent to customize response
+      const intent = this.analyzeIntent(request.message);
+
+      // Generate fallback response based on intent and recommendations
+      let assistantMessage: string;
+
+      if (context.recommendations && context.recommendations.length > 0) {
+        const movieList = context.recommendations
+          .slice(0, 5)
+          .map((m, i) => `${i + 1}. **${m.title}** (${m.year || 'N/A'}) - ${m.genres?.join(', ') || 'N/A'}`)
+          .join('\n');
+
+        if (intent.isRecommendationRequest) {
+          assistantMessage = `¡Aquí tienes algunas recomendaciones basadas en tus gustos!\n\n${movieList}\n\n` +
+            `Estas películas fueron seleccionadas considerando tu historial de valoraciones. ` +
+            `¿Te gustaría más detalles sobre alguna de ellas?`;
+        } else if (intent.isAnalysisRequest) {
+          assistantMessage = `Encontré estas películas que podrían interesarte:\n\n${movieList}\n\n` +
+            `¿Hay algún género específico que te gustaría explorar más?`;
+        } else {
+          assistantMessage = `Basándome en tu historial, estas películas podrían gustarte:\n\n${movieList}\n\n` +
+            `El servicio de chat avanzado no está disponible temporalmente, pero puedo seguir recomendándote películas.`;
+        }
+      } else {
+        assistantMessage = `Lo siento, no pude encontrar recomendaciones específicas para ti en este momento. ` +
+          `Te sugiero explorar las categorías populares o calificar algunas películas para mejorar tus recomendaciones.\n\n` +
+          `El servicio de chat avanzado no está disponible temporalmente.`;
+      }
+
+      // Save conversation to database
+      await geminiContextBuilder.saveChatMessage(
+        request.userId,
+        conversationId,
+        'user',
+        request.message,
+        undefined,
+        'fallback'
+      );
+
+      const recommendedMoviesJson = context.recommendations
+        ? JSON.stringify(context.recommendations.map(m => ({
+            id: m.id,
+            title: m.title,
+            score: m.recommendationScore
+          })))
+        : undefined;
+
+      const assistantChatMsg = await geminiContextBuilder.saveChatMessage(
+        request.userId,
+        conversationId,
+        'assistant',
+        assistantMessage,
+        recommendedMoviesJson,
+        'fallback'
+      );
+
+      const duration = Date.now() - startTime;
+
+      const response: GeminiChatResponseData = {
+        id: assistantChatMsg.id.toString(),
+        conversationId,
+        userMessage: request.message,
+        assistantMessage,
+        tokensUsed: 0,
+        recommendedMovies: context.recommendations,
+        contextSource: 'fallback' as any,
+        timestamp: new Date().toISOString()
+      };
+
+      console.log(`✅ Fallback chat complete in ${duration}ms\n`);
+      return response;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`❌ Fallback chat failed: ${message}`);
+      throw new Error(`Fallback chat error: ${message}`);
+    }
+  }
 }
 
 export const geminiChatService = GeminiChatService.getInstance();

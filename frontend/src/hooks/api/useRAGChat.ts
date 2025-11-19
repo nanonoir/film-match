@@ -34,20 +34,21 @@ export const useRAGChat = () => {
     mutationFn: (request: ChatRequestDTO) => ragService.chat(request),
     onSuccess: (response, request) => {
       // Cache the conversation
-      if (request.conversationId) {
+      const convId = request.conversationId || response.conversationId;
+      if (convId) {
         queryClient.setQueryData(
-          queryKeys.rag.chatHistory(request.conversationId),
+          queryKeys.rag.chatHistory(convId),
           (old: ChatMessageDTO[] = []) => [
             ...old,
             {
               role: 'user' as const,
               content: request.message,
-              timestamp: new Date(),
+              timestamp: new Date().toISOString(),
             },
             {
               role: 'assistant' as const,
-              content: response.response,
-              timestamp: new Date(),
+              content: response.assistantMessage,
+              timestamp: response.timestamp,
             },
           ]
         );

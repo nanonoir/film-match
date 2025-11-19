@@ -24,13 +24,16 @@ export interface ChatRequestDTO {
  * Respuesta del chat con recomendaciones opcionales
  */
 export interface ChatResponseDTO {
-  response: string;
+  id: string;
   conversationId: string;
-  recommendations?: MovieDTO[];
-  metadata?: {
-    tokensUsed?: number;
-    processingTime?: number;
-  };
+  userMessage: string;
+  assistantMessage: string;
+  tokensUsed: number;
+  recommendedMovies?: MovieDTO[];
+  contextSource: string;
+  timestamp: string;
+  // Alias for backwards compatibility
+  response?: string;
 }
 
 /**

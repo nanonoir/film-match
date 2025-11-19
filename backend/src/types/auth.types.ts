@@ -11,6 +11,24 @@ export interface JWTPayload {
 }
 
 /**
+ * Payload del Refresh Token
+ */
+export interface RefreshTokenPayload {
+  userId: string;
+  tokenId: string;
+  iat?: number;
+  exp?: number;
+}
+
+/**
+ * Par de tokens (access + refresh)
+ */
+export interface TokenPair {
+  accessToken: string;
+  refreshToken: string;
+}
+
+/**
  * Datos del usuario obtenidos de Google
  */
 export interface GoogleUserData {

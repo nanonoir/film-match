@@ -2,7 +2,7 @@
   "name": "film-match-backend",
   "version": "0.1.0",
   "description": "Film-Match Backend API with TypeScript, Express, and Prisma",
-  "main": "dist/index.js",
+  "main": "dist/server.js",
   "type": "module",
   "scripts": {
     "dev": "nodemon --exec tsx src/server.ts",

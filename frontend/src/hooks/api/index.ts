@@ -6,3 +6,4 @@ export { useRatings } from './useRatings';
 export { useCollections } from './useCollections';
 export { useRAGChat } from './useRAGChat';
 export { useUserReviews } from './useUserReviews';
+export { useMatches } from './useMatches';

@@ -23,3 +23,13 @@ export type {
   SemanticSearchResultDTO,
   RecommendationDTO,
 } from '@/api/types/rag.types';
+
+// Match
+export type {
+  MatchStatus,
+  UserMatchDTO,
+  MatchlistResponse,
+  MatchStats,
+  CreateMatchPayload,
+  MatchQueryParams,
+} from '@/api/types/match.types';

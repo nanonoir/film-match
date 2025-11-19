@@ -1,64 +1,110 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2 } from 'lucide-react';
+import { useRAGChat } from '@/hooks/api/useRAGChat';
 
 interface Message {
-  id: number;
+  id: string;
   text: string;
   sender: 'user' | 'bot';
   timestamp: Date;
+  movies?: Array<{
+    id: number;
+    title: string;
+    releaseYear?: number;
+    genres?: string[];
+  }>;
 }
 
 const Chatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
-      id: 1,
-      text: '¡Hola! Soy tu asistente de recomendaciones. ¿Qué tipo de películas te gustan?',
+      id: '1',
+      text: '¡Hola! Soy tu asistente de recomendaciones de Film-Match. Pregúntame sobre películas, pídeme recomendaciones o cuéntame qué tipo de películas te gustan.',
       sender: 'bot',
       timestamp: new Date(),
     },
   ]);
   const [inputValue, setInputValue] = useState('');
+  const [conversationId, setConversationId] = useState<string | undefined>();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const {
+    sendMessage,
+    isChattingLoading,
+    chatResponse,
+    chatError,
+  } = useRAGChat();
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Handle chat response
+  useEffect(() => {
+    if (chatResponse) {
+      const botMessage: Message = {
+        id: chatResponse.id || Date.now().toString(),
+        text: chatResponse.assistantMessage,
+        sender: 'bot',
+        timestamp: new Date(),
+        movies: chatResponse.recommendedMovies?.map((m: any) => ({
+          id: m.id,
+          title: m.title,
+          releaseYear: m.releaseYear,
+          genres: m.genres,
+        })),
+      };
+      setMessages((prev) => [...prev, botMessage]);
+
+      // Update conversation ID for continuity
+      if (chatResponse.conversationId) {
+        setConversationId(chatResponse.conversationId);
+      }
+    }
+  }, [chatResponse]);
+
+  // Handle errors
+  useEffect(() => {
+    if (chatError) {
+      const errorMessage: Message = {
+        id: Date.now().toString(),
+        text: 'Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo.',
+        sender: 'bot',
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    }
+  }, [chatError]);
 
   const handleSend = () => {
-    if (inputValue.trim() === '') return;
+    if (inputValue.trim() === '' || isChattingLoading) return;
 
     const userMessage: Message = {
-      id: messages.length + 1,
+      id: Date.now().toString(),
       text: inputValue,
       sender: 'user',
       timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    setInputValue('');
 
-    // Simulación de respuesta del bot
-    setTimeout(() => {
-      const botResponse: Message = {
-        id: messages.length + 2,
-        text: getBotResponse(inputValue),
-        sender: 'bot',
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, botResponse]);
-    }, 1000);
+    // Send to RAG service
+    try {
+      sendMessage(inputValue, conversationId, 5);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+
+    setInputValue('');
   };
 
-  const getBotResponse = (userInput: string): string => {
-    const input = userInput.toLowerCase();
-
-    if (input.includes('thriller') || input.includes('suspenso')) {
-      return '¡Excelente elección! Te recomiendo "Inception" y "The Dark Knight". Son películas llenas de suspenso y acción.';
-    } else if (input.includes('acción') || input.includes('action')) {
-      return 'Para películas de acción, te sugiero "Gladiator" y "The Matrix". ¡Son espectaculares!';
-    } else if (input.includes('drama')) {
-      return 'Si te gustan los dramas, no te pierdas "The Shawshank Redemption" y "Forrest Gump". Son obras maestras.';
-    } else if (input.includes('sci-fi') || input.includes('ciencia ficción')) {
-      return '¡Las películas de ciencia ficción son increíbles! Prueba con "Interstellar" y "The Matrix".';
-    } else {
-      return 'Interesante. ¿Prefieres películas de acción, drama, thriller o ciencia ficción? ¡Tengo grandes recomendaciones para ti!';
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
     }
   };
 
@@ -98,7 +144,9 @@ const Chatbot: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold">Asistente Film-Match</h3>
-                  <p className="text-xs text-gray-400">Siempre disponible</p>
+                  <p className="text-xs text-gray-400">
+                    {isChattingLoading ? 'Escribiendo...' : 'Siempre disponible'}
+                  </p>
                 </div>
               </div>
               <button
@@ -127,10 +175,43 @@ const Chatbot: React.FC = () => {
                         : 'bg-dark-input text-gray-100'
                     }`}
                   >
-                    <p className="text-sm">{message.text}</p>
+                    <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+
+                    {/* Show recommended movies if present */}
+                    {message.movies && message.movies.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-gray-700">
+                        <p className="text-xs text-gray-400 mb-2">Películas mencionadas:</p>
+                        <div className="space-y-1">
+                          {message.movies.slice(0, 3).map((movie) => (
+                            <div
+                              key={movie.id}
+                              className="text-xs bg-dark-bg px-2 py-1 rounded"
+                            >
+                              {movie.title}
+                              {movie.releaseYear && ` (${movie.releaseYear})`}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               ))}
+
+              {/* Loading indicator */}
+              {isChattingLoading && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex justify-start"
+                >
+                  <div className="bg-dark-input text-gray-100 px-4 py-2 rounded-2xl">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  </div>
+                </motion.div>
+              )}
+
+              <div ref={messagesEndRef} />
             </div>
 
             {/* Input */}
@@ -140,15 +221,21 @@ const Chatbot: React.FC = () => {
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                  onKeyPress={handleKeyPress}
                   placeholder="Escribe tu mensaje..."
-                  className="flex-1 bg-dark-input text-white px-4 py-2 rounded-xl outline-none focus:ring-2 focus:ring-primary-pink transition-all placeholder-gray-500 text-sm"
+                  disabled={isChattingLoading}
+                  className="flex-1 bg-dark-input text-white px-4 py-2 rounded-xl outline-none focus:ring-2 focus:ring-primary-pink transition-all placeholder-gray-500 text-sm disabled:opacity-50"
                 />
                 <button
                   onClick={handleSend}
-                  className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center hover:opacity-90 transition-opacity"
+                  disabled={isChattingLoading || !inputValue.trim()}
+                  className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
-                  <Send className="w-5 h-5 text-white" />
+                  {isChattingLoading ? (
+                    <Loader2 className="w-5 h-5 text-white animate-spin" />
+                  ) : (
+                    <Send className="w-5 h-5 text-white" />
+                  )}
                 </button>
               </div>
             </div>

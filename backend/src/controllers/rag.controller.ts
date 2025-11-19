@@ -189,23 +189,31 @@ export class RagController {
         throw new AppError(400, 'message cannot exceed 2000 characters');
       }
 
-      // Check if Gemini is configured
-      if (!geminiChatService.isConfigured()) {
-        throw new AppError(
-          503,
-          'Chat service is not configured. Please set GEMINI_API_KEY in environment variables. ' +
-          'Get a free key at: https://aistudio.google.com/app/apikey'
-        );
-      }
-
-      // Call chat service
-      const response = await geminiChatService.chat({
+      // Prepare chat request
+      const chatRequest = {
         userId,
         message: message.trim(),
         conversationId,
         includeRecommendations: includeRecommendations !== false, // Default true
         topK: topK || 5
-      });
+      };
+
+      let response;
+
+      // Use Gemini if configured, otherwise use fallback
+      if (geminiChatService.isConfigured()) {
+        try {
+          response = await geminiChatService.chat(chatRequest);
+        } catch (geminiError) {
+          // If Gemini fails (rate limit, API error, etc.), try fallback
+          console.warn('⚠️  Gemini chat failed, using fallback:', geminiError);
+          response = await geminiChatService.fallbackChat(chatRequest);
+        }
+      } else {
+        // Gemini not configured, use fallback directly
+        console.log('ℹ️  Gemini not configured, using fallback chat');
+        response = await geminiChatService.fallbackChat(chatRequest);
+      }
 
       // Return response
       res.status(200).json({

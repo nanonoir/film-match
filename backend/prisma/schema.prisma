@@ -35,6 +35,8 @@ model User {
   collections      UserCollection[]
   chatMessages     ChatMessage[]
   preferences      UserPreferences?
+  matches          UserMatch[]
+  refreshTokens    RefreshToken[]
 
   @@index([email])
   @@index([googleId])
@@ -61,9 +63,11 @@ model Movie {
   collections UserCollection[]
   embeddings MovieEmbedding[]
   userPreferences UserPreferenceMovie[]
+  matches UserMatch[]
 
   @@index([tmdbId])
   @@index([createdAt])
+  @@index([voteAverage])
 }
 
 // ============================================
@@ -217,4 +221,49 @@ model UserPreferenceMovie {
   @@unique([preferencesId, movieId]) // No duplicados
   @@index([preferencesId])
   @@index([movieId])
+}
+
+// ============================================
+// ENUM PARA ESTADO DE MATCH
+// ============================================
+enum MatchStatus {
+  like
+  dislike
+  superlike
+}
+
+// ============================================
+// MATCHES DE USUARIOS (Swipe like/dislike)
+// ============================================
+model UserMatch {
+  id        Int         @id @default(autoincrement())
+  userId    Int
+  movieId   Int
+  status    MatchStatus
+  createdAt DateTime    @default(now())
+
+  // Relaciones
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, movieId])
+  @@index([userId, status])
+  @@index([userId, createdAt])
+}
+
+// ============================================
+// REFRESH TOKENS
+// ============================================
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  tokenHash String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  // Relaciones
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, tokenHash])
 }

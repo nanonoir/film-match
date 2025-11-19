@@ -11,6 +11,7 @@ export const QUERY_CACHE_TIMES = {
   RATINGS: 1 * 60 * 1000, // 1 minute
   COLLECTIONS: 1 * 60 * 1000, // 1 minute
   CHAT_HISTORY: 2 * 60 * 1000, // 2 minutes
+  MATCHES: 1 * 60 * 1000, // 1 minute
 
   // Moderately changing data
   CURRENT_USER: 5 * 60 * 1000, // 5 minutes
@@ -18,11 +19,13 @@ export const QUERY_CACHE_TIMES = {
   MOVIES: 5 * 60 * 1000, // 5 minutes
   MOVIE_SEARCH: 5 * 60 * 1000, // 5 minutes
   SEARCH_RESULTS: 5 * 60 * 1000, // 5 minutes
+  DISCOVER: 5 * 60 * 1000, // 5 minutes
 
   // Rarely changing data
   MOVIE_DETAILS: 10 * 60 * 1000, // 10 minutes
   RECOMMENDATIONS: 10 * 60 * 1000, // 10 minutes
   RATING_STATS: 10 * 60 * 1000, // 10 minutes
+  MATCH_STATS: 10 * 60 * 1000, // 10 minutes
 
   // Very stable data
   CATEGORIES: 24 * 60 * 60 * 1000, // 24 hours
@@ -151,6 +154,15 @@ export const queryKeys = {
     semanticSearch: (query: string) => [...queryKeys.rag.all, 'semantic-search', query] as const,
     recommendations: () => [...queryKeys.rag.all, 'recommendations'] as const,
     suggestions: () => [...queryKeys.rag.all, 'suggestions'] as const,
+  },
+
+  matches: {
+    all: ['matches'] as const,
+    lists: () => [...queryKeys.matches.all, 'list'] as const,
+    list: (status?: string) => [...queryKeys.matches.lists(), status] as const,
+    discover: (limit?: number) => [...queryKeys.matches.all, 'discover', limit || 10] as const,
+    stats: () => [...queryKeys.matches.all, 'stats'] as const,
+    status: (movieId: number) => [...queryKeys.matches.all, 'status', movieId] as const,
   },
 } as const;
 
