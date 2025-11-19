@@ -1,13 +1,18 @@
 {
   "version": 2,
-  "projects": [
+  "builds": [
     {
-      "name": "film-match-frontend",
-      "rootDirectory": "frontend"
-    },
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "frontend/dist"
+      }
+    }
+  ],
+  "routes": [
     {
-      "name": "film-match-backend",
-      "rootDirectory": "backend"
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
