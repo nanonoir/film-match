@@ -6,7 +6,7 @@
  * Persists filter state in URL query parameters
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Sliders } from 'lucide-react';
@@ -16,7 +16,9 @@ import { SearchFiltersModal } from '../presentation/components/Search/SearchFilt
 import { SearchResults } from '../presentation/components/Search/SearchResults';
 import { Pagination } from '../presentation/components/Search/Pagination';
 import { useFiltersContext } from '../context/filters/useFiltersContext';
-import { useSearch } from '../hooks/useSearch';
+import { useMovies } from '@/hooks/api/useMovies';
+import { MovieMapper } from '@/api/mappers';
+import type { Movie } from '@core';
 import type { DecadeOption, TrendOption, SortOption } from '../context/filters/FiltersContext';
 
 export const Search: React.FC = () => {
@@ -37,8 +39,74 @@ export const Search: React.FC = () => {
     sortBy,
   } = useFiltersContext();
 
-  const { filteredMovies, totalResults, totalPages, currentPage } = useSearch();
   const isInitializedRef = useRef(false);
+
+  // Build API query params
+  const apiParams = useMemo(() => ({
+    search: criteria.search || undefined,
+    minRating: criteria.minRating > 0 ? criteria.minRating * 2 : undefined, // Convert 0-5 to 0-10
+    page: pagination.currentPage,
+    limit: pagination.itemsPerPage,
+    sortBy: sortBy === 'title' ? 'title' : sortBy === 'rating' ? 'vote_average' : 'release_date',
+    sortOrder: 'desc' as const,
+  }), [criteria.search, criteria.minRating, pagination.currentPage, pagination.itemsPerPage, sortBy]);
+
+  // Fetch movies from API
+  const { moviesData, isLoadingMovies } = useMovies(apiParams);
+
+  // Client-side filtering for features not supported by API
+  const filteredMovies = useMemo(() => {
+    let results: Movie[] = moviesData?.data?.map(dto => MovieMapper.toDomain(dto)) || [];
+
+    // Apply decade filter
+    if (decade !== 'all') {
+      const decadeRanges: { [key: string]: [number, number] } = {
+        '70s': [1970, 1979],
+        '80s': [1980, 1989],
+        '90s': [1990, 1999],
+        '00s': [2000, 2009],
+        '10s': [2010, 2019],
+        '20s': [2020, 2029],
+      };
+
+      const [minYear, maxYear] = decadeRanges[decade] || [1970, new Date().getFullYear()];
+      results = results.filter((movie) => movie.year >= minYear && movie.year <= maxYear);
+    }
+
+    // Apply trend filter (based on movie rating and year)
+    if (trend !== 'all') {
+      const currentYear = new Date().getFullYear();
+      if (trend === 'trending') {
+        // Trending: newer movies with high ratings
+        results = results.filter((movie) => movie.rating >= 3.5 && movie.year >= currentYear - 3);
+      } else if (trend === 'recent') {
+        // Recent: movies from last 5 years
+        results = results.filter((movie) => movie.year >= currentYear - 5);
+      } else if (trend === 'oldest') {
+        // Oldest: movies before 2000
+        results = results.filter((movie) => movie.year < 2000);
+      }
+    }
+
+    // Apply sorting (API already sorts, but we may need client-side after filtering)
+    switch (sortBy) {
+      case 'title':
+        results.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case 'rating':
+        results.sort((a, b) => b.rating - a.rating);
+        break;
+      case 'date':
+        results.sort((a, b) => b.year - a.year);
+        break;
+    }
+
+    return results;
+  }, [moviesData, decade, trend, sortBy]);
+
+  const totalResults = filteredMovies.length;
+  const totalPages = Math.ceil(totalResults / pagination.itemsPerPage);
+  const currentPage = pagination.currentPage;
 
   // Initialize filters from URL on mount
   useEffect(() => {
@@ -118,16 +186,24 @@ export const Search: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <SearchResults movies={filteredMovies} totalResults={totalResults} />
+          {isLoadingMovies ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-pink"></div>
+            </div>
+          ) : (
+            <>
+              <SearchResults movies={filteredMovies} totalResults={totalResults} />
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalResults={totalResults}
-              itemsPerPage={pagination.itemsPerPage}
-            />
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalResults={totalResults}
+                  itemsPerPage={pagination.itemsPerPage}
+                />
+              )}
+            </>
           )}
         </motion.div>
       </div>

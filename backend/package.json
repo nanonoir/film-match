@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "description": "Film-Match Backend API with TypeScript, Express, and Prisma",
   "main": "dist/server.js",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "dev": "nodemon --exec tsx src/server.ts",
     "build": "tsc",
-    "start": "node --experimental-specifier-resolution=node dist/server.js",
+    "start": "node dist/server.js",
     "seed": "tsx scripts/seed.ts",
     "index-vectors": "tsx scripts/index-vectors.ts",
     "test:connection": "tsx scripts/test-connection.ts",
