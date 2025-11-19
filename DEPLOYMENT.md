@@ -64,9 +64,10 @@ postgresql://film_match_user:password@dpg-xxx.render.internal:5432/film_match
 3. Completa los datos:
    - **Name:** `film-match-backend`
    - **Region:** Misma región que la base de datos
-   - **Branch:** `develop` (o tu rama principal)
+   - **Branch:** `main` o `develop` (tu rama principal)
+   - **Root Directory:** `backend`
    - **Runtime:** Node
-   - **Build Command:** `npm run build`
+   - **Build Command:** `npm ci --include=dev && npx prisma migrate deploy && npx prisma generate && npm run build`
    - **Start Command:** `npm run start`
 
 ### Paso 2: Configurar Variables de Entorno
@@ -197,6 +198,23 @@ Si la migración de Prisma falla:
 - Los logs en Render mostrarán el error específico
 - Puedes ejecutar manualmente: `npx prisma db push` en el backend local
 - Luego redeploy en Render
+
+#### 5. Error de TypeScript - "Could not find a declaration file"
+Si ves errores como `TS7016: Could not find a declaration file for module 'express'`:
+
+**Causa:** Render ejecuta `npm install` en modo producción, lo que omite `devDependencies` (donde están los `@types/*` necesarios para compilar TypeScript).
+
+**Solución:** Actualiza el **Build Command** en Render a:
+```bash
+npm ci --include=dev && npx prisma migrate deploy && npx prisma generate && npm run build
+```
+
+El flag `--include=dev` asegura que los paquetes de `devDependencies` se instalen durante la compilación.
+
+**Alternativa:** Añade esta variable de entorno en Render:
+- `NPM_CONFIG_PRODUCTION` = `false`
+
+Esto desactiva el modo producción para npm install, pero la primera opción es más explícita y recomendada.
 
 ---
 
