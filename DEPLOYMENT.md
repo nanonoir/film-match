@@ -75,18 +75,27 @@ postgresql://film_match_user:password@dpg-xxx.render.internal:5432/film_match
 En la sección **"Environment"**, añade todas las variables:
 
 ```
+# Requeridas siempre
 DATABASE_URL=postgresql://film_match_user:password@dpg-xxx.render.internal:5432/film_match
 NODE_ENV=production
 PORT=3001
 FRONTEND_URL=https://tu-dominio.vercel.app
 JWT_SECRET=tu_jwt_secret_very_long_min_32_chars
 JWT_REFRESH_SECRET=tu_jwt_refresh_secret_very_long_min_32_chars
-JWT_EXPIRES_IN=7d
+JWT_EXPIRES_IN=15m
 JWT_REFRESH_EXPIRES_IN=30d
 TMDB_API_KEY=tu_tmdb_api_key
+
+# Google OAuth (OPCIONAL - dejar disabled si no tienes credenciales)
+GOOGLE_AUTH_ENABLED=false
+# GOOGLE_CLIENT_ID=tu_google_client_id  # Solo si GOOGLE_AUTH_ENABLED=true
+# GOOGLE_CLIENT_SECRET=tu_google_secret  # Solo si GOOGLE_AUTH_ENABLED=true
+# GOOGLE_REDIRECT_URI=tu_redirect_uri    # Solo si GOOGLE_AUTH_ENABLED=true
+
+# RAG Features (OPCIONAL - funcionará sin ellas)
 GEMINI_API_KEY=tu_gemini_api_key
 PINECONE_API_KEY=tu_pinecone_api_key
-PINECONE_ENVIRONMENT=tu_pinecone_environment
+PINECONE_ENVIRONMENT=us-east-1
 PINECONE_INDEX=film-match
 ```
 
@@ -215,6 +224,36 @@ El flag `--include=dev` asegura que los paquetes de `devDependencies` se instale
 - `NPM_CONFIG_PRODUCTION` = `false`
 
 Esto desactiva el modo producción para npm install, pero la primera opción es más explícita y recomendada.
+
+#### 6. Error "Missing required environment variables: GOOGLE_CLIENT_ID"
+Si ves el error:
+```
+Error: Missing required environment variables: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI
+```
+
+**Causa:** Google OAuth está habilitado por defecto, pero no has configurado las credenciales.
+
+**Solución rápida (deshabilitar Google OAuth):**
+Añade esta variable de entorno en Render:
+```
+GOOGLE_AUTH_ENABLED=false
+```
+
+Luego redeploy. La aplicación funcionará solo con autenticación email/password.
+
+**Solución alternativa (habilitar Google OAuth):**
+1. Ve a [Google Cloud Console](https://console.cloud.google.com)
+2. Crea un proyecto y habilita Google OAuth
+3. Obtén las credenciales OAuth 2.0
+4. Añade en Render:
+   ```
+   GOOGLE_AUTH_ENABLED=true
+   GOOGLE_CLIENT_ID=tu_client_id
+   GOOGLE_CLIENT_SECRET=tu_client_secret
+   GOOGLE_REDIRECT_URI=https://tu-backend.onrender.com/api/auth/google/callback
+   ```
+
+**Nota:** Para MVP, se recomienda deshabilitar Google OAuth (`GOOGLE_AUTH_ENABLED=false`) y usar solo email/password.
 
 ---
 
